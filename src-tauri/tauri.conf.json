@@ -40,6 +40,9 @@
     "longDescription": "MDViewer：Tauri 2 + Rust（comrak）驱动的跨平台 Markdown 编辑器，支持实时预览、公式 / 图表、大纲导航、全文搜索与 HTML / PDF 导出。",
     "publisher": "mdviewer",
     "copyright": "MIT License",
+    "resources": {
+      "bin/WebView2Loader.dll": "WebView2Loader.dll"
+    },
     "macOS": {
       "minimumSystemVersion": "10.15"
     },

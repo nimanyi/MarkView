@@ -29,6 +29,11 @@
        才导出 `clock_gettime64`；若 `bin\` 内是旧版 DLL，gcc 的 `-E` 预处理路径（windres 编
        resource.rc 时触发）会以 0xC0000139（入口点未找到）静默失败。新版 DLL 需同时放入
        `bin\` 与 `lib\gcc\x86_64-w64-mingw32\16.2.0\`（应用目录优先级高于 PATH）
+    7. 工具链坑（已修复）：`webview2-com-sys` 0.38 在 **MSVC** 下链接静态库 `WebView2LoaderStatic.lib`，
+       而在 **GNU** 下链接动态导入库——安装后运行时必须能在 exe 旁找到 `WebView2Loader.dll`，
+       否则报"找不到 webviewloader.dll"。已在 `tauri.conf.json > bundle.resources`
+       将 `src-tauri/bin/WebView2Loader.dll` 打进安装包（安装到 exe 同目录）；
+       直接运行 `target/release|debug/mdviewer.exe` 时需手动复制该 DLL 到 exe 旁
   - **macOS**：Xcode Command Line Tools（`xcode-select --install`）
   - **Linux**：`libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf`
 
@@ -56,7 +61,7 @@ npm run tauri build
 
 | 平台 | 产物 |
 | --- | --- |
-| Windows | `nsis/*.exe` 安装包 + `nsis/*.exe.sig` 签名（updater 工件） |
+| Windows | `nsis/*.exe` 安装包（含 `WebView2Loader.dll`）+ `nsis/*.exe.sig` 签名（updater 工件） |
 | macOS | `dmg/*.dmg` + `.app.tar.gz.sig` |
 | Linux | `deb/*.deb`、`appimage/*.AppImage` + `.sig` |
 
@@ -102,6 +107,7 @@ mdviewer/
 │  │  └─ lib.rs             # Tauri 命令（parse_markdown / read_file / write_file / list_dir / search_in_dir）
 │  ├─ capabilities/         # 权限声明（对话框 + updater + process）
 │  ├─ icons/                # 应用图标（tauri icon 生成）
+│  ├─ bin/                  # WebView2Loader.dll（GNU 工具链运行时依赖，随包分发）
 │  ├─ tauri.conf.json       # Tauri 配置（bundle 元数据 + updater 公钥）
 │  └─ Cargo.toml
 ├─ .github/workflows/       # CI：main 分支构建 + tag 发布（latest.json）
