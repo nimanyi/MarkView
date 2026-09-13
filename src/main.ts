@@ -41,6 +41,7 @@ import {
   initTabs,
   markActiveText,
   openTab,
+  openWelcome,
   refreshTabs,
   tabLabel,
   type TabState,
@@ -59,6 +60,7 @@ import {
 } from "./theme";
 
 const preview = document.querySelector<HTMLElement>("#preview")!;
+const panesEl = document.querySelector<HTMLElement>(".panes")!;
 const editorHost = document.querySelector<HTMLElement>("#editor-host")!;
 const cmHost = document.querySelector<HTMLElement>("#cm-host")!;
 const formatBarEl = document.querySelector<HTMLElement>("#format-bar")!;
@@ -93,99 +95,6 @@ const helpVersionEl = document.querySelector<HTMLElement>("#help-version")!;
 
 const win = getCurrentWindow();
 
-/** 欢迎文档：无文件打开时的示例内容 */
-const SAMPLE = `# 欢迎使用 MDViewer
-
-> 左侧编辑，右侧实时预览。解析由 **Rust 端 comrak** 完成。
-
-## 快捷键
-
-| 快捷键 | 功能 |
-| --- | --- |
-| Ctrl+N | 新建文档 |
-| Ctrl+O | 打开文件 |
-| Ctrl+Shift+O | 打开文件夹（文件树） |
-| Ctrl+S | 保存 |
-| Ctrl+Shift+S | 另存为 |
-| Ctrl+W | 关闭标签页 |
-| Ctrl+Tab / Ctrl+Shift+Tab | 切换标签 |
-| Ctrl+Shift+E | 导出 HTML |
-| Ctrl+P | 打印 / 导出 PDF |
-| Ctrl+\\ | 切换侧边栏 |
-| Ctrl+Shift+V | 切换视图（双栏 / 仅编辑 / 仅预览） |
-| Ctrl+Shift+D | 隐藏 / 显示预览（仅编辑 ↔ 双栏） |
-| Alt+T | 显示 / 隐藏排版工具栏 |
-| Ctrl+, | 设置（主题 / 视图 / 字号 / 同步滚动 / 自动保存） |
-| Ctrl+Shift+H | 使用说明 |
-| Ctrl+Shift+L | 切换主题 |
-| Ctrl+Shift+F | 全文搜索 |
-| Ctrl+Shift+U | 检查更新 |
-
-## 编辑排版（光标在编辑器内时）
-
-| 快捷键 | 功能 |
-| --- | --- |
-| Ctrl+B | 加粗（再按取消） |
-| Ctrl+I | 斜体 |
-| Ctrl+E | 行内代码 |
-| Ctrl+Shift+X | 删除线 |
-| Ctrl+K | 插入链接（选区作文字） |
-| Ctrl+1 ~ Ctrl+6 | 设为 H1~H6 标题（同键再按取消） |
-
-> 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
-> 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
-> 按 \`Ctrl+Shift+V\` 可在双栏 / 仅编辑 / 仅预览之间循环切换（设置面板中同样可选）。
-> 右键菜单按位置提供剪切 / 复制 / 粘贴、复制链接等操作；浏览器默认菜单（查看源代码 / 检查等）已屏蔽。
-> 从文件打开的文档默认自动保存：停止输入 2 秒后写回原文件，可在设置（Ctrl+,）中关闭。
-
-## 多标签
-
-可同时打开多份文档：点击标签切换，Ctrl+Tab / Ctrl+Shift+Tab 循环切换，
-Ctrl+W 或中键点击关闭当前标签。标签左端圆点亮起表示该文档有未保存修改；
-右键标签可批量关闭：关闭左侧 / 右侧 / 其他 / 所有（含未保存修改时统一确认一次）；
-打开新文件不会打断当前编辑——旧文档连同修改一起留在后台标签。
-
-## 排版工具栏
-
-编辑区顶部有一排排版按钮（加粗、斜体、引用、列表、标题、表格、分隔线等），
-与上表快捷键完全同源，并随光标位置高亮当前格式。点击工具栏右侧的收起按钮
-或按 \`Alt+T\` 可隐藏；隐藏后点编辑区右上角的 ▾ 或再按 \`Alt+T\` 展开。
-
-## GFM 特性
-
-- [x] 表格
-- [x] 任务列表
-- [x] 删除线（~~这样~~）
-- [x] 自动链接：https://tauri.app
-- [x] 数学公式与图表（见下方示例）
-
-## 数学公式
-
-行内公式 $E = mc^2$，块级公式：
-
-$$
-\\int_0^\\infty e^{-x^2}\\,dx = \\frac{\\sqrt{\\pi}}{2}
-$$
-
-## 流程图（Mermaid）
-
-\`\`\`mermaid
-flowchart LR
-    A[编辑] --> B{Rust comrak 解析}
-    B --> C[预览渲染]
-    B --> D[导出 HTML / PDF]
-\`\`\`
-
-\`\`\`rust
-#[tauri::command]
-fn parse_markdown(source: String) -> String {
-    comrak::markdown_to_html(&source, &options)
-}
-\`\`\`
-
-按 \`Ctrl+O\` 打开你的第一份 Markdown 文档吧。
-`;
-
 /* ---------- 文档状态（多标签：路径与磁盘快照都存在标签里） ---------- */
 
 function currentContent(): string {
@@ -194,7 +103,8 @@ function currentContent(): string {
 
 function isDirty(): boolean {
   const tab = activeTab();
-  return tab !== null && currentContent() !== tab.diskText;
+  /* 引导页不进编辑器：currentContent() 是残留的旧文档，不能拿来判脏 */
+  return tab !== null && tab.kind !== "welcome" && currentContent() !== tab.diskText;
 }
 
 function docName(): string {
@@ -630,8 +540,7 @@ view = createEditor(
   initialDark,
 );
 
-/* 多标签装配：快照 / 装载 / 保存 / 确认全部回调到主装配；
-   欢迎文档作为第一个未命名标签装入 */
+/* 多标签装配：快照 / 装载 / 保存 / 确认全部回调到主装配 */
 initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
   snapshot() {
     return {
@@ -643,6 +552,15 @@ initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
   },
   load(tab) {
     cancelAutoSave(); // 旧标签的定时器不再属于新文档
+    if (tab.kind === "welcome") {
+      /* 引导页：编辑 / 预览 / 分隔条交给 data-welcome 的 CSS 隐藏 */
+      panesEl.dataset.welcome = "on";
+      statPosEl.textContent = "";
+      statCountEl.textContent = "";
+      syncChrome();
+      return;
+    }
+    delete panesEl.dataset.welcome;
     setDocText(view, tab.text); // 触发 onDocChange：预览 / 状态栏 / dirty 联动
     const clamp = (pos: number) => Math.min(Math.max(pos, 0), view.state.doc.length);
     view.dispatch({ selection: { anchor: clamp(tab.anchor), head: clamp(tab.head) } });
@@ -657,7 +575,7 @@ initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
   confirm: (tab) => confirmUnsaved(`“${tabLabel(tab)}”`),
   confirmMany: (label) => confirmUnsaved(label),
 });
-openTab(null, SAMPLE);
+openWelcome(); // 启动默认显示引导页（新建 / 打开后自动切换为编辑视图）
 
 /* 编辑排版工具栏：按钮与快捷键同源（format.ts），显隐持久化，Alt+T 切换 */
 initFormatBar({
@@ -720,6 +638,12 @@ btnSettings.addEventListener("click", () => openSettingsDialog());
 btnTheme.addEventListener("click", doCycleTheme);
 btnToggleSidebar.addEventListener("click", toggleSidebar);
 btnRefreshTree.addEventListener("click", () => void sidebar.refresh());
+
+/* 引导页快捷入口：与顶栏按钮 / 快捷键同源 */
+document.querySelector<HTMLButtonElement>("#wc-new")!.addEventListener("click", () => void doNew());
+document.querySelector<HTMLButtonElement>("#wc-open")!.addEventListener("click", () => void doOpen());
+document.querySelector<HTMLButtonElement>("#wc-dir")!.addEventListener("click", () => void doOpenFolder());
+document.querySelector<HTMLButtonElement>("#wc-help")!.addEventListener("click", () => helpDlg.showModal());
 searchInputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void runSearch();
 });

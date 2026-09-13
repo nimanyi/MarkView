@@ -250,6 +250,101 @@ body.sidebar-hidden .panes .sidebar {
   display: none;
 }
 
+/* ---------- 引导页（启动 / 关闭全部标签时经 tabs 激活显示） ---------- */
+
+.welcome-view {
+  display: none;
+}
+
+.panes[data-welcome="on"] > .editor-host,
+.panes[data-welcome="on"] > .pane-divider,
+.panes[data-welcome="on"] > .preview {
+  display: none;
+}
+
+.panes[data-welcome="on"] > .welcome-view {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  overflow: auto;
+}
+
+.welcome-card {
+  width: min(560px, 100%);
+  padding: 36px 40px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-editor);
+}
+
+.welcome-title {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 0.5px;
+}
+
+.welcome-sub {
+  margin: 6px 0 24px;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+.welcome-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.welcome-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.welcome-btn:hover {
+  border-color: var(--accent);
+}
+
+.welcome-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.welcome-btn .wc-key {
+  font-size: 11px;
+  color: var(--fg-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+.welcome-btn.primary .wc-key {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.welcome-feats {
+  margin: 24px 0 0;
+  padding-left: 18px;
+  color: var(--fg-muted);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
 /* 侧栏 tab */
 .sidebar-tabs {
   display: flex;

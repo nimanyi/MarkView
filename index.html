@@ -62,6 +62,33 @@
         </div>
         <div id="pane-divider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="拖动调节编辑区与预览区宽度（双击复位）"></div>
         <article id="preview" class="preview" aria-label="渲染预览"></article>
+        <section class="welcome-view" id="welcome-view" aria-label="引导页">
+          <div class="welcome-card">
+            <h1 class="welcome-title">MDViewer</h1>
+            <p class="welcome-sub">Markdown 编辑 · 实时预览 · 导出分享</p>
+            <div class="welcome-actions">
+              <button id="wc-new" class="welcome-btn primary" type="button">
+                <span class="wc-label">新建文档</span><span class="wc-key">Ctrl+N</span>
+              </button>
+              <button id="wc-open" class="welcome-btn" type="button">
+                <span class="wc-label">打开文件</span><span class="wc-key">Ctrl+O</span>
+              </button>
+              <button id="wc-dir" class="welcome-btn" type="button">
+                <span class="wc-label">打开文件夹</span><span class="wc-key">Ctrl+Shift+O</span>
+              </button>
+              <button id="wc-help" class="welcome-btn" type="button">
+                <span class="wc-label">使用说明</span><span class="wc-key">Ctrl+Shift+H</span>
+              </button>
+            </div>
+            <ul class="welcome-feats">
+              <li>Rust comrak 解析：GFM 表格、任务列表、删除线、自动链接</li>
+              <li>多标签同时编辑多份文档，右键标签批量关闭</li>
+              <li>KaTeX 数学公式与 Mermaid 图表实时渲染</li>
+              <li>一键导出自包含 HTML，或打印为 PDF</li>
+              <li>文件树、大纲导航、全文搜索、自动保存</li>
+            </ul>
+          </div>
+        </section>
       </section>
       <footer class="app-footer">
         <span id="stat-pos">行 1，列 1</span>
@@ -145,6 +172,7 @@
             <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
             <li>自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
             <li>多标签：可同时打开多份文档，点击标签或 Ctrl+Tab 切换，Ctrl+W / 中键关闭；右键标签可批量关闭左侧 / 右侧 / 其他 / 所有；标签圆点亮起表示有未保存修改，打开新文件不会打断当前编辑</li>
+            <li>引导页：启动或关闭全部标签时显示，提供新建 / 打开文件 / 打开文件夹 / 使用说明的快捷入口</li>
           </ul>
         </section>
         <section>

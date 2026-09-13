@@ -14,6 +14,8 @@ import { showContextMenu, type CtxMenuEntry } from "./contextmenu";
 
 export interface TabState {
   id: number;
+  /** doc = 普通文档；welcome = 引导页（只展示，不装载编辑器、永不脏） */
+  kind?: "doc" | "welcome";
   path: string | null; // null = 未命名
   diskText: string; // 打开 / 保存时的磁盘内容（判 dirty）
   text: string; // 编辑器内容（onDocChange 实时快照）
@@ -23,6 +25,7 @@ export interface TabState {
 }
 
 export function tabLabel(tab: TabState): string {
+  if (tab.kind === "welcome") return "欢迎使用";
   return tab.path ? baseName(tab.path) : "未命名";
 }
 
@@ -125,12 +128,12 @@ function renderTabs(): void {
   bar.replaceChildren(frag);
 }
 
-/** 切换激活：先快照旧标签，再装载新标签 */
+/** 切换激活：先快照旧标签（引导页不进编辑器，跳过快照），再装载新标签 */
 export function activate(id: number): void {
   if (!hooks) return;
   if (id === activeId) return;
   const old = activeTab();
-  if (old) Object.assign(old, hooks.snapshot());
+  if (old && old.kind !== "welcome") Object.assign(old, hooks.snapshot());
   activeId = id;
   const tab = tabs.find((t) => t.id === id);
   if (!tab) return;
@@ -154,8 +157,25 @@ export function openTab(path: string | null, diskText: string): TabState {
   return tab;
 }
 
+/** 打开引导页标签（启动 / 关闭全部标签时）：不可编辑、永不脏 */
+export function openWelcome(): TabState {
+  const tab: TabState = {
+    id: nextId++,
+    kind: "welcome",
+    path: null,
+    diskText: "",
+    text: "",
+    anchor: 0,
+    head: 0,
+    scrollTop: 0,
+  };
+  tabs.push(tab);
+  activate(tab.id);
+  return tab;
+}
+
 /** 关闭标签：脏标签先确认；关闭的是当前标签则激活相邻（优先右侧）；
- *  全部关闭后自动补一个未命名空标签 */
+ *  全部关闭后自动回到引导页 */
 export async function closeTab(id: number): Promise<void> {
   if (!hooks) return;
   const idx = tabs.findIndex((t) => t.id === id);
@@ -168,7 +188,7 @@ export async function closeTab(id: number): Promise<void> {
   }
   tabs.splice(idx, 1);
   if (tabs.length === 0) {
-    openTab(null, "");
+    openWelcome();
     return;
   }
   if (tab.id === activeId) {
@@ -237,7 +257,7 @@ export async function closeTabs(ids: number[]): Promise<void> {
     if (i >= 0) tabs.splice(i, 1);
   }
   if (tabs.length === 0) {
-    openTab(null, "");
+    openWelcome();
     return;
   }
   if (tabs.some((t) => t.id === activeId)) {
