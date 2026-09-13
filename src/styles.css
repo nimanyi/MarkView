@@ -595,6 +595,52 @@ body.sidebar-hidden .panes .sidebar {
   background: var(--code-bg);
 }
 
+/* ---------- 右键上下文菜单（contextmenu.ts；不设 display，交给 [hidden] 控制） ---------- */
+
+.ctx-menu {
+  position: fixed;
+  z-index: 999;
+  min-width: 168px;
+  padding: 4px;
+  background: var(--bg-editor);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+  user-select: none;
+}
+
+.ctx-item {
+  appearance: none;
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  padding: 7px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ctx-item:hover:not(:disabled) {
+  background: var(--code-bg);
+}
+
+.ctx-item:disabled {
+  color: var(--fg-muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ctx-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
 /* 分栏分隔条：拖动调节编辑 / 预览宽度（splitter.ts 控制编辑区宽度百分比） */
 .pane-divider {
   flex: none;

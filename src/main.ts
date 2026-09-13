@@ -29,6 +29,7 @@ import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
 import { cycleViewMode, initViewMode } from "./layout";
 import { initFormatBar, updateFormatBar } from "./toolbar";
+import { initContextMenu } from "./contextmenu";
 import { getSettings, initSettingsDialog, openSettingsDialog } from "./settings";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
@@ -116,6 +117,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 > 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
 > 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
 > 按 \`Ctrl+Shift+V\` 可在双栏 / 仅编辑 / 仅预览之间循环切换（设置面板中同样可选）。
+> 右键菜单按位置提供剪切 / 复制 / 粘贴、复制链接等操作；浏览器默认菜单（查看源代码 / 检查等）已屏蔽。
 > 从文件打开的文档默认自动保存：停止输入 2 秒后写回原文件，可在设置（Ctrl+,）中关闭。
 
 ## 排版工具栏
@@ -592,6 +594,10 @@ initFormatBar({
   editorHost,
   showBtn: formatBarShow,
 });
+
+/* 右键菜单：屏蔽 WebView 默认菜单（查看源代码 / 检查 / 属性等），
+   换成按位置的剪切 / 复制 / 粘贴 / 全选 / 复制链接 */
+initContextMenu(view);
 
 /* 设置面板：字号 / 同步滚动即时生效；主题改动联动编辑器与预览（同 doCycleTheme） */
 initSettingsDialog({
