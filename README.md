@@ -70,9 +70,9 @@ npm run tauri build
 - **原理**：应用内「检查更新」（状态栏按钮或 Ctrl+Shift+U）调用 updater 插件，
   请求 `tauri.conf.json > plugins.updater.endpoints` 指向的 `latest.json` 清单；
   版本更新时下载安装包，用配置内 **公钥** 校验 `.sig` 签名后静默安装并重启。
-- **启用前必须修改**：`tauri.conf.json` 中 updater endpoint 的 `owner/repo`
-  （当前为占位值 `mdviewer/mdviewer`），换成你实际的 GitHub 仓库；
-  CI 发布后旧版本即可收到更新推送。
+- **启用前必须修改**：`tauri.conf.json` 中 updater endpoint 已指向
+  `github.com/nimanyi/MarkView` 的 `latest.json`；
+  推送 `v*` 标签触发 CI 发布后，旧版本即可收到更新推送。
 - **CI 发布**：推送 `v*` 标签触发 release job（tauri-action）——
   需在仓库 Settings → Secrets 配置 `TAURI_SIGNING_PRIVATE_KEY`（`.tauri/mdviewer.key` 文件内容）
   与 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`（本仓库密钥无密码，设为空串）；
@@ -145,10 +145,13 @@ mdviewer/
 > 多标签页：可同时打开多份文档，顶栏下方标签条点击切换，Ctrl+Tab / Ctrl+Shift+Tab 循环、Ctrl+W / 中键关闭；右键标签批量关闭左侧 / 右侧 / 其他 / 所有（脏标签统一确认一次）；标签圆点示脏，打开新文件不打断当前编辑（旧文档连同修改留在后台），关闭脏标签或窗口时三态确认；
 > 引导页：启动与关闭全部标签时显示欢迎面板（新建 / 打开文件 / 打开文件夹 / 使用说明快捷入口 + 特性简介），代替原先的空白「未命名」文档；
 > 使用说明（Ctrl+Shift+H）：应用简介、界面组成与全部快捷键速查、版本与技术栈信息、「关于」版权公示。
+> 「关于」项目主页：github.com/nimanyi/MarkView，点击经系统浏览器打开（tauri-plugin-opener），旁附一键复制；
+> 预览区外链（http / https / mailto）同样改由系统默认程序打开，修复此前 WebView 内导航会顶掉应用界面的问题。
 
 ## 许可与致谢
 
 - © 2026 MDViewer · 保留所有权利；本软件以 MIT 许可发布（`tauri.conf.json > bundle.copyright`）。
+- 项目主页：<https://github.com/nimanyi/MarkView>（应用内「关于」区同款展示，点击经系统浏览器打开）。
 - 在下列开源组件之上构建：Tauri 2（MIT / Apache-2.0）、CodeMirror 6（MIT）、
   comrak（BSD-2-Clause）、KaTeX（MIT）、Mermaid（MIT）——感谢以上开源社区的贡献者。
 - 应用内「关于」公示位于使用说明（Ctrl+Shift+H）末尾，与本文保持一致。

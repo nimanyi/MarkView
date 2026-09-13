@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getVersion } from "@tauri-apps/api/app";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { EditorView } from "@codemirror/view";
 import "katex/dist/katex.min.css";
 import {
@@ -644,6 +645,38 @@ document.querySelector<HTMLButtonElement>("#wc-new")!.addEventListener("click", 
 document.querySelector<HTMLButtonElement>("#wc-open")!.addEventListener("click", () => void doOpen());
 document.querySelector<HTMLButtonElement>("#wc-dir")!.addEventListener("click", () => void doOpenFolder());
 document.querySelector<HTMLButtonElement>("#wc-help")!.addEventListener("click", () => helpDlg.showModal());
+
+/* 「关于」项目主页：系统浏览器打开（失败降级为复制地址）+ 一键复制 */
+const REPO_URL = "https://github.com/nimanyi/MarkView";
+document
+  .querySelector<HTMLButtonElement>("#about-repo")!
+  .addEventListener("click", () =>
+    openUrl(REPO_URL).catch(() => void navigator.clipboard?.writeText(REPO_URL)),
+  );
+document
+  .querySelector<HTMLButtonElement>("#about-repo-copy")!
+  .addEventListener("click", async (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    try {
+      await navigator.clipboard.writeText(REPO_URL);
+      btn.textContent = "已复制";
+      setTimeout(() => (btn.textContent = "复制"), 1500);
+    } catch {
+      /* WebView 剪贴板被拒时静默降级 */
+    }
+  });
+
+/* 预览区外链（http / https / mailto）：交系统默认程序打开，
+   避免 WebView 内导航把应用界面顶掉；页内锚点放行由预览容器自行滚动 */
+preview.addEventListener("click", (e) => {
+  const anchor = (e.target as HTMLElement).closest("a[href]");
+  if (!(anchor instanceof HTMLAnchorElement)) return;
+  const href = anchor.getAttribute("href") ?? "";
+  if (/^(https?|mailto):/i.test(href)) {
+    e.preventDefault();
+    void openUrl(href);
+  }
+});
 searchInputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void runSearch();
 });

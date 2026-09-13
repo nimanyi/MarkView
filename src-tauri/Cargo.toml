@@ -22,6 +22,8 @@ tauri-plugin-dialog = "2"
 # Windows(schannel)/macOS(Security.framework) 零 C 编译，Linux 走 openssl（CI 已装 libssl-dev）
 tauri-plugin-updater = { version = "2", default-features = false, features = ["native-tls", "system-proxy", "zip"] }
 tauri-plugin-process = "2"
+# opener：用系统默认浏览器 / 邮件客户端打开「关于」与预览中的外链
+tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # 禁用默认 feature（syntect 语法高亮会引入 C 依赖 onig，需要本机 C 编译器）；

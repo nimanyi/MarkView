@@ -966,6 +966,36 @@ body.dragging-panes {
   line-height: 1.7;
 }
 
+/* 项目主页：链接样式按钮 + 复制小按钮 */
+.about-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.about-copy {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.about-copy:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
 .panel-body {
   max-height: min(58vh, 480px);
   overflow-y: auto;
