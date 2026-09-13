@@ -1,0 +1,16 @@
+# 前端
+node_modules
+dist
+
+# Rust
+src-tauri/target
+src-tauri/gen/schemas
+
+# 本机专属的 cargo 配置（含绝对路径，按需自行创建，见 README）
+src-tauri/.cargo/config.toml
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+*.local
+.idea

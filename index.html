@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MDViewer</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <span class="app-name">MDViewer</span>
+        <span class="app-hint">脚手架预览 · 解析由 Rust 端 comrak 完成（IPC 链路已打通）</span>
+      </header>
+      <section class="panes">
+        <textarea id="editor" spellcheck="false" aria-label="Markdown 源码"></textarea>
+        <article id="preview" class="preview" aria-label="渲染预览"></article>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

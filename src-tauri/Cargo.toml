@@ -1,0 +1,31 @@
+[package]
+name = "mdviewer"
+version = "0.1.0"
+description = "Cross-platform Markdown editor & viewer"
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "mdviewer_lib"
+# 桌面应用无需 cdylib：GNU ld 自动导出全部符号会超 65535 上限
+# （export ordinal too large），移除后桌面三平台均可正常构建
+crate-type = ["staticlib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# 禁用默认 feature（syntect 语法高亮会引入 C 依赖 onig，需要本机 C 编译器）；
+# 代码高亮改由前端（highlight.js / CodeMirror）实现。
+comrak = { version = "0.49.0", default-features = false }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
