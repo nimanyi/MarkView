@@ -30,6 +30,20 @@ import { initSplitter } from "./splitter";
 import { cycleViewMode, initViewMode, togglePreview } from "./layout";
 import { initFormatBar, updateFormatBar } from "./toolbar";
 import { initContextMenu } from "./contextmenu";
+import {
+  activate,
+  activeTab,
+  activateNext,
+  closeActiveTab,
+  dirtyTabs,
+  findTab,
+  initTabs,
+  markActiveText,
+  openTab,
+  refreshTabs,
+  tabLabel,
+  type TabState,
+} from "./tabs";
 import { getSettings, initSettingsDialog, openSettingsDialog } from "./settings";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
@@ -92,6 +106,8 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+Shift+O | 打开文件夹（文件树） |
 | Ctrl+S | 保存 |
 | Ctrl+Shift+S | 另存为 |
+| Ctrl+W | 关闭标签页 |
+| Ctrl+Tab / Ctrl+Shift+Tab | 切换标签 |
 | Ctrl+Shift+E | 导出 HTML |
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
@@ -120,6 +136,12 @@ const SAMPLE = `# 欢迎使用 MDViewer
 > 按 \`Ctrl+Shift+V\` 可在双栏 / 仅编辑 / 仅预览之间循环切换（设置面板中同样可选）。
 > 右键菜单按位置提供剪切 / 复制 / 粘贴、复制链接等操作；浏览器默认菜单（查看源代码 / 检查等）已屏蔽。
 > 从文件打开的文档默认自动保存：停止输入 2 秒后写回原文件，可在设置（Ctrl+,）中关闭。
+
+## 多标签
+
+可同时打开多份文档：点击标签切换，Ctrl+Tab / Ctrl+Shift+Tab 循环切换，
+Ctrl+W 或中键点击关闭当前标签。标签左端圆点亮起表示该文档有未保存修改；
+打开新文件不会打断当前编辑——旧文档连同修改一起留在后台标签。
 
 ## 排版工具栏
 
@@ -162,21 +184,20 @@ fn parse_markdown(source: String) -> String {
 按 \`Ctrl+O\` 打开你的第一份 Markdown 文档吧。
 `;
 
-/* ---------- 文档状态 ---------- */
-
-let currentPath: string | null = null;
-let savedContent = SAMPLE;
+/* ---------- 文档状态（多标签：路径与磁盘快照都存在标签里） ---------- */
 
 function currentContent(): string {
   return getDocText(view);
 }
 
 function isDirty(): boolean {
-  return currentContent() !== savedContent;
+  const tab = activeTab();
+  return tab !== null && currentContent() !== tab.diskText;
 }
 
 function docName(): string {
-  return currentPath ? baseName(currentPath) : "未命名.md";
+  const tab = activeTab();
+  return tab ? tabLabel(tab) : "未命名";
 }
 
 /** 同步窗口标题 / 顶栏文件名 / 状态提示 */
@@ -238,9 +259,10 @@ function syncStats(view: EditorView): void {
 
 /* ---------- 未保存确认（三态） ---------- */
 
-function confirmUnsaved(): Promise<"save" | "discard" | "cancel"> {
+/** 未保存确认（三态）；displayName 兼容单个标签与关窗口时「等 N 个文档」 */
+function confirmUnsaved(displayName: string): Promise<"save" | "discard" | "cancel"> {
   return new Promise((resolve) => {
-    unsavedText.textContent = `是否保存对“${docName()}”的更改？`;
+    unsavedText.textContent = `是否保存对“${displayName}”的更改？`;
     const done = (value: "save" | "discard" | "cancel") => {
       unsavedDlg.close(value);
     };
@@ -262,20 +284,21 @@ function confirmUnsaved(): Promise<"save" | "discard" | "cancel"> {
 
 /* ---------- 打开 / 新建 / 保存 ---------- */
 
-/** 打开指定路径的文件（文件树 / 对话框 / 搜索结果共用，含未保存确认） */
+/**
+ * 打开指定路径的文件（文件树 / 对话框 / 搜索结果共用）：
+ * 已有同路径标签则直接激活，否则新建标签——多标签下旧文档连同
+ * 未保存修改留在后台，不再打断确认。
+ */
 async function openPath(path: string, gotoLine = 0): Promise<void> {
-  if (isDirty()) {
-    const choice = await confirmUnsaved();
-    if (choice === "cancel") return;
-    if (choice === "save" && !(await doSave())) return;
-  }
-  cancelAutoSave(); // 换文件：旧文件的待保存任务作废
   try {
-    const content = await readTextFile(path);
-    currentPath = path;
-    savedContent = content;
-    setDocText(view, content);
-    await renderPreview();
+    const existing = findTab(path);
+    if (existing) {
+      if (existing.id === activeTab()?.id) return;
+      activate(existing.id);
+    } else {
+      const content = await readTextFile(path);
+      openTab(path, content);
+    }
     if (gotoLine > 0) {
       const line = view.state.doc.line(Math.min(gotoLine, view.state.doc.lines));
       view.dispatch({
@@ -284,9 +307,6 @@ async function openPath(path: string, gotoLine = 0): Promise<void> {
       });
       view.focus();
     }
-    syncChrome();
-    syncStats(view);
-    sidebar.setCurrentPath(path);
   } catch (err) {
     saveHintEl.textContent = String(err);
   }
@@ -297,45 +317,64 @@ async function doOpen(): Promise<void> {
   if (path) await openPath(path);
 }
 
-async function doNew(): Promise<void> {
-  if (isDirty()) {
-    const choice = await confirmUnsaved();
-    if (choice === "cancel") return;
-    if (choice === "save" && !(await doSave())) return;
-  }
-  cancelAutoSave();
-  currentPath = null;
-  savedContent = "";
-  setDocText(view, "");
-  await renderPreview();
-  syncChrome();
-  syncStats(view);
-  sidebar.setCurrentPath(null);
+/** 新建未命名标签（旧文档留在后台，无需确认） */
+function doNew(): void {
+  openTab(null, "");
 }
 
-/** 保存：有路径直接写，无路径走另存为。返回是否成功。 */
-async function doSave(): Promise<boolean> {
-  if (currentPath) {
+/** 保存指定标签（可能是后台脏标签）：有路径直写，无路径走另存为 */
+async function saveTab(tab: TabState): Promise<boolean> {
+  const isActive = tab.id === activeTab()?.id;
+  const text = isActive ? currentContent() : tab.text;
+  if (tab.path) {
     try {
-      savedContent = currentContent();
-      await writeTextFile(currentPath, savedContent);
-      syncChrome();
+      tab.diskText = text;
+      await writeTextFile(tab.path, text);
+      refreshTabs();
+      if (isActive) syncChrome();
       return true;
     } catch (err) {
       saveHintEl.textContent = String(err);
       return false;
     }
   }
-  return doSaveAs();
+  /* 未命名：走另存为 */
+  const path = await pickSavePath(tabLabel(tab));
+  if (!path) return false;
+  try {
+    tab.diskText = text;
+    await writeTextFile(path, text);
+    tab.path = path;
+    refreshTabs();
+    if (isActive) {
+      syncChrome();
+      sidebar.setCurrentPath(path);
+    }
+    void sidebar.refresh(); // 保存到树内的新位置后刷新文件树
+    return true;
+  } catch (err) {
+    saveHintEl.textContent = String(err);
+    return false;
+  }
+}
+
+/** 保存当前标签：有路径直接写，无路径走另存为。返回是否成功。 */
+async function doSave(): Promise<boolean> {
+  const tab = activeTab();
+  return tab ? saveTab(tab) : false;
 }
 
 async function doSaveAs(): Promise<boolean> {
-  const path = await pickSavePath(currentPath ?? docName());
+  const tab = activeTab();
+  if (!tab) return false;
+  const path = await pickSavePath(tab.path ?? tabLabel(tab));
   if (!path) return false;
   try {
-    savedContent = currentContent();
-    await writeTextFile(path, savedContent);
-    currentPath = path;
+    const text = currentContent();
+    tab.diskText = text;
+    await writeTextFile(path, text);
+    tab.path = path;
+    refreshTabs();
     syncChrome();
     sidebar.setCurrentPath(path);
     void sidebar.refresh(); // 保存到树内的新位置后刷新文件树
@@ -361,12 +400,12 @@ function cancelAutoSave(): void {
 function scheduleAutoSave(): void {
   cancelAutoSave();
   if (!getSettings().autoSave) return;
-  if (currentPath === null || !isDirty()) return; // 未命名文档无处可写
+  if (activeTab()?.path == null || !isDirty()) return; // 未命名文档无处可写
   autoSaveTimer = window.setTimeout(() => void autoSaveNow(), AUTO_SAVE_DELAY);
 }
 
 async function autoSaveNow(): Promise<void> {
-  if (currentPath === null || !isDirty()) return; // 等待期间可能已手动保存
+  if (activeTab()?.path == null || !isDirty()) return; // 等待期间可能已手动保存
   if (await doSave()) {
     saveHintEl.textContent = "已自动保存"; // 覆盖 syncChrome 的“已保存”，下次改动会刷新
   }
@@ -572,9 +611,10 @@ const initialDark = initTheme((dark) => {
 
 view = createEditor(
   cmHost,
-  SAMPLE,
+  "", // 初始为空：内容由第一个标签装载（见下方 openTab）
   {
     onDocChange(v) {
+      markActiveText(getDocText(v)); // 实时快照到当前标签（dirty 圆点联动）
       scheduleRender();
       syncStats(v);
       syncChrome();
@@ -587,6 +627,34 @@ view = createEditor(
   },
   initialDark,
 );
+
+/* 多标签装配：快照 / 装载 / 保存 / 确认全部回调到主装配；
+   欢迎文档作为第一个未命名标签装入 */
+initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
+  snapshot() {
+    return {
+      text: currentContent(),
+      anchor: view.state.selection.main.anchor,
+      head: view.state.selection.main.head,
+      scrollTop: view.scrollDOM.scrollTop,
+    };
+  },
+  load(tab) {
+    cancelAutoSave(); // 旧标签的定时器不再属于新文档
+    setDocText(view, tab.text); // 触发 onDocChange：预览 / 状态栏 / dirty 联动
+    const clamp = (pos: number) => Math.min(Math.max(pos, 0), view.state.doc.length);
+    view.dispatch({ selection: { anchor: clamp(tab.anchor), head: clamp(tab.head) } });
+    requestAnimationFrame(() => {
+      view.scrollDOM.scrollTop = tab.scrollTop; // 视口测量完成后再恢复滚动
+    });
+    sidebar.setCurrentPath(tab.path);
+    syncChrome();
+    view.focus();
+  },
+  save: (tab) => saveTab(tab),
+  confirm: (tab) => confirmUnsaved(tabLabel(tab)),
+});
+openTab(null, SAMPLE);
 
 /* 编辑排版工具栏：按钮与快捷键同源（format.ts），显隐持久化，Alt+T 切换 */
 initFormatBar({
@@ -663,7 +731,10 @@ installShortcuts([
   { key: "o", label: "打开文件", run: () => void doOpen() },
   { key: "o", shift: true, label: "打开文件夹", run: () => void doOpenFolder() },
   { key: "s", label: "保存", run: () => void doSave() },
-  { key: "s", shift: true, label: "另存为", run: () => void doSaveAs() },
+  { key: "s", shift: true, label: "另存为", run: () => doSaveAs() },
+  { key: "w", label: "关闭标签页", run: closeActiveTab },
+  { key: "tab", label: "下一个标签", run: () => activateNext(1) },
+  { key: "tab", shift: true, label: "上一个标签", run: () => activateNext(-1) },
   { key: "e", shift: true, label: "导出 HTML", run: () => void doExportHtml() },
   { key: "p", label: "打印 / 导出 PDF", run: () => void doExportPdf() },
   { key: ",", label: "设置", run: () => openSettingsDialog() },
@@ -676,17 +747,24 @@ installShortcuts([
   { key: "u", shift: true, label: "检查更新", run: () => void doCheckUpdate() },
 ]);
 
-/* ---------- 关闭拦截：未保存时确认 ---------- */
+/* ---------- 关闭拦截：多个脏标签时批量确认 ---------- */
 
 void win.onCloseRequested(async (event) => {
-  if (!isDirty()) return;
+  const dirty = dirtyTabs();
+  if (dirty.length === 0) return;
   event.preventDefault();
-  const choice = await confirmUnsaved();
-  if (choice === "save" && (await doSave())) {
-    await win.destroy();
-  } else if (choice === "discard") {
-    await win.destroy();
+  const name =
+    dirty.length === 1
+      ? tabLabel(dirty[0])
+      : `“${tabLabel(dirty[0])}”等 ${dirty.length} 个文档`;
+  const choice = await confirmUnsaved(name);
+  if (choice === "cancel") return;
+  if (choice === "save") {
+    for (const tab of dirty) {
+      if (!(await saveTab(tab))) return; // 保存失败（含取消另存为）则中止关窗
+    }
   }
+  await win.destroy();
   /* cancel：什么都不做，窗口保持打开 */
 });
 

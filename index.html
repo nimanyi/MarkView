@@ -26,6 +26,7 @@
         </span>
         <span class="app-hint" id="save-hint" data-tauri-drag-region></span>
       </header>
+      <div class="tab-bar" id="tab-bar" role="tablist" aria-label="打开的文档"></div>
       <section class="panes">
         <aside class="sidebar" id="sidebar" aria-label="侧边栏">
           <div class="sidebar-tabs" role="tablist">
@@ -143,6 +144,7 @@
             <li>编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
             <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
             <li>自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
+            <li>多标签：可同时打开多份文档，点击标签或 Ctrl+Tab 切换，Ctrl+W / 中键关闭；标签圆点亮起表示有未保存修改，打开新文件不会打断当前编辑</li>
           </ul>
         </section>
         <section>
@@ -152,6 +154,8 @@
               <tr><td>Ctrl+N</td><td>新建文档</td></tr>
               <tr><td>Ctrl+O / Ctrl+Shift+O</td><td>打开文件 / 打开文件夹</td></tr>
               <tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 另存为</td></tr>
+              <tr><td>Ctrl+W</td><td>关闭标签页</td></tr>
+              <tr><td>Ctrl+Tab / Ctrl+Shift+Tab</td><td>下一个 / 上一个标签</td></tr>
               <tr><td>Ctrl+Shift+E / Ctrl+P</td><td>导出 HTML / 打印・PDF</td></tr>
               <tr><td>Ctrl+\</td><td>切换侧边栏</td></tr>
               <tr><td>Ctrl+Shift+V</td><td>切换视图（双栏 / 仅编辑 / 仅预览）</td></tr>
