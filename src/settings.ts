@@ -1,16 +1,17 @@
 /**
- * 设置面板：主题 / 编辑与预览字号 / 同步滚动 / 排版工具栏。
+ * 设置面板：主题 / 视图模式 / 编辑与预览字号 / 同步滚动 / 排版工具栏。
  *
  *  - 所有改动即时生效并持久化（无“确定”按钮，现代即时保存风格）；
  *  - 字号经 CSS 变量（--editor-font-size / --preview-font-size）下发，
  *    编辑器与预览无需重建；
- *  - 主题与工具栏显隐沿用各自模块的存储（theme.ts / toolbar.ts），
+ *  - 主题、视图与工具栏显隐沿用各自模块的存储（theme.ts / layout.ts / toolbar.ts），
  *    这里只做 UI 联动。
  */
 
 import { currentMode, setThemeMode, type ThemeMode } from "./theme";
 import { setSyncScrollEnabled } from "./scroll";
 import { formatBarVisible, setFormatBarVisible } from "./toolbar";
+import { currentViewMode, setViewMode, type ViewMode } from "./layout";
 
 export interface Settings {
   editorFont: number;
@@ -82,6 +83,7 @@ export function openSettingsDialog(): void {
 export function initSettingsDialog(hooks: SettingsHooks): void {
   const dlg = document.querySelector<HTMLDialogElement>("#settings-dialog")!;
   const segBtns = document.querySelectorAll<HTMLButtonElement>("#theme-seg .seg-btn");
+  const viewSegBtns = document.querySelectorAll<HTMLButtonElement>("#view-seg .seg-btn");
   const editorFont = document.querySelector<HTMLInputElement>("#set-editor-font")!;
   const editorFontVal = document.querySelector<HTMLElement>("#editor-font-value")!;
   const previewFont = document.querySelector<HTMLInputElement>("#set-preview-font")!;
@@ -94,6 +96,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
   const syncUI = (): void => {
     const mode = currentMode();
     for (const b of segBtns) b.classList.toggle("active", b.dataset.mode === mode);
+    for (const b of viewSegBtns) b.classList.toggle("active", b.dataset.mode === currentViewMode());
     editorFont.value = String(settings.editorFont);
     editorFontVal.textContent = `${settings.editorFont}px`;
     previewFont.value = String(settings.previewFont);
@@ -119,6 +122,14 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
       const mode = (b.dataset.mode ?? "auto") as ThemeMode;
       setThemeMode(mode);
       hooks.onTheme(mode);
+      syncUI();
+    });
+  }
+
+  /* 视图模式：三态切换由 layout.ts 处理（含分栏比例恢复与持久化） */
+  for (const b of viewSegBtns) {
+    b.addEventListener("click", () => {
+      setViewMode((b.dataset.mode ?? "split") as ViewMode);
       syncUI();
     });
   }

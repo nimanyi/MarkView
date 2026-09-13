@@ -41,9 +41,25 @@ function savedRatio(): number | null {
   return Math.min(MAX_RATIO, Math.max(MIN_RATIO, v));
 }
 
+/* 装配后的引用（reapplyRatio 供 layout.ts 切回双栏时复用） */
+let els: SplitterElements | null = null;
+
+/** 重新应用持久化比例；无记录则清内联尺寸回到 CSS 默认的对半分 */
+export function reapplyRatio(): void {
+  if (!els) return;
+  const ratio = savedRatio();
+  if (ratio === null) {
+    els.editorHost.style.flex = "";
+    els.editorHost.style.width = "";
+  } else {
+    applyRatio(els.editorHost, els.sidebar, els.panes, ratio);
+  }
+}
+
 /** 安装分隔条拖拽；返回恢复函数（仅测试用，应用内不调用） */
 export function initSplitter(el: SplitterElements): () => void {
   const { panes, sidebar, editorHost, divider } = el;
+  els = el;
 
   const restore = savedRatio();
   if (restore !== null) applyRatio(editorHost, sidebar, panes, restore);

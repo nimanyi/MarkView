@@ -86,6 +86,14 @@
             </div>
           </div>
           <div class="set-row">
+            <span class="set-label">视图</span>
+            <div id="view-seg" class="seg" role="radiogroup" aria-label="视图模式">
+              <button type="button" class="seg-btn" data-mode="split">双栏</button>
+              <button type="button" class="seg-btn" data-mode="editor">仅编辑</button>
+              <button type="button" class="seg-btn" data-mode="preview">仅预览</button>
+            </div>
+          </div>
+          <div class="set-row">
             <label class="set-label" for="set-editor-font">编辑器字号</label>
             <input id="set-editor-font" type="range" min="12" max="20" step="1" />
             <span class="set-value" id="editor-font-value"></span>
@@ -130,6 +138,7 @@
           <h3>界面</h3>
           <ul>
             <li>侧边栏（Ctrl+\）：文件树 / 文档大纲 / 全文搜索三个标签页</li>
+            <li>视图模式（Ctrl+Shift+V）：双栏 / 仅编辑 / 仅预览，设置面板中同样可选</li>
             <li>编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
             <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
             <li>自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
@@ -144,6 +153,7 @@
               <tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 另存为</td></tr>
               <tr><td>Ctrl+Shift+E / Ctrl+P</td><td>导出 HTML / 打印・PDF</td></tr>
               <tr><td>Ctrl+\</td><td>切换侧边栏</td></tr>
+              <tr><td>Ctrl+Shift+V</td><td>切换视图（双栏 / 仅编辑 / 仅预览）</td></tr>
               <tr><td>Alt+T</td><td>显示 / 隐藏排版工具栏</td></tr>
               <tr><td>Ctrl+Shift+L</td><td>循环切换主题</td></tr>
               <tr><td>Ctrl+Shift+F</td><td>全文搜索</td></tr>

@@ -27,6 +27,7 @@ import { createSidebar, type Sidebar } from "./sidebar";
 import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
+import { cycleViewMode, initViewMode } from "./layout";
 import { initFormatBar, updateFormatBar } from "./toolbar";
 import { getSettings, initSettingsDialog, openSettingsDialog } from "./settings";
 import { checkForUpdates, updateErrorText } from "./updater";
@@ -93,8 +94,9 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+Shift+E | 导出 HTML |
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
+| Ctrl+Shift+V | 切换视图（双栏 / 仅编辑 / 仅预览） |
 | Alt+T | 显示 / 隐藏排版工具栏 |
-| Ctrl+, | 设置（主题 / 字号 / 同步滚动 / 自动保存） |
+| Ctrl+, | 设置（主题 / 视图 / 字号 / 同步滚动 / 自动保存） |
 | Ctrl+Shift+H | 使用说明 |
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
@@ -113,6 +115,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 
 > 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
 > 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
+> 按 \`Ctrl+Shift+V\` 可在双栏 / 仅编辑 / 仅预览之间循环切换（设置面板中同样可选）。
 > 从文件打开的文档默认自动保存：停止输入 2 秒后写回原文件，可在设置（Ctrl+,）中关闭。
 
 ## 排版工具栏
@@ -619,6 +622,13 @@ initSplitter({
   divider: document.querySelector<HTMLElement>("#pane-divider")!,
 });
 
+/* 视图模式：双栏 / 仅编辑 / 仅预览（Ctrl+Shift+V 循环，设置面板可选）；
+   需在 splitter 之后初始化：切回双栏时由其恢复分栏比例 */
+initViewMode({
+  panes: document.querySelector<HTMLElement>(".panes")!,
+  editorHost,
+});
+
 /* ---------- 按钮 ---------- */
 
 btnNew.addEventListener("click", () => void doNew());
@@ -652,6 +662,7 @@ installShortcuts([
   { key: ",", label: "设置", run: () => openSettingsDialog() },
   { key: "h", shift: true, label: "使用说明", run: () => helpDlg.showModal() },
   { key: "\\", label: "切换侧边栏", run: toggleSidebar },
+  { key: "v", shift: true, label: "切换视图（双栏 / 仅编辑 / 仅预览）", run: () => cycleViewMode() },
   { key: "l", shift: true, label: "切换主题", run: doCycleTheme },
   { key: "f", shift: true, label: "全文搜索", run: focusSearch },
   { key: "u", shift: true, label: "检查更新", run: () => void doCheckUpdate() },

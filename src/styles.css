@@ -39,6 +39,12 @@
   box-sizing: border-box;
 }
 
+/* hidden 属性必须永远生效：作者样式里的 display 会盖过浏览器对 [hidden] 的默认隐藏，
+   曾导致收起工具栏后「展开」按钮常驻，一碰就把工具栏唤回（表现为无法隐藏） */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -156,6 +162,14 @@ body.sidebar-hidden .panes .sidebar {
   display: none;
 }
 
+/* 视图模式（layout.ts 在 .panes 上切 data-mode）：仅编辑 / 仅预览时藏掉另一侧与中缝 */
+.panes[data-mode="editor"] > .pane-divider,
+.panes[data-mode="editor"] > .preview,
+.panes[data-mode="preview"] > .pane-divider,
+.panes[data-mode="preview"] > .editor-host {
+  display: none;
+}
+
 /* 侧栏 tab */
 .sidebar-tabs {
   display: flex;
@@ -192,10 +206,6 @@ body.sidebar-hidden .panes .sidebar {
   flex-direction: column;
   min-height: 0;
   flex: 1;
-}
-
-.sidebar-pane[hidden] {
-  display: none;
 }
 
 .sidebar-header {
