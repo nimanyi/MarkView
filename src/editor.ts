@@ -6,6 +6,8 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { oneDark } from "@codemirror/theme-one-dark";
 
+import { formatKeymap } from "./format";
+
 export type { EditorView } from "@codemirror/view";
 
 /** 编辑器事件回调 */
@@ -52,6 +54,9 @@ export function createEditor(
     extensions: [
       basicSetup,
       keymap.of([indentWithTab]),
+      /* Markdown 格式快捷键：toggle 语义（加粗/标题/链接等，见 format.ts），
+         内部用 Prec.highest 覆盖 lang-markdown 自带的“仅插入”keymap */
+      formatKeymap,
       markdown({
         base: markdownLanguage,
         codeLanguages: languages,

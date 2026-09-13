@@ -91,9 +91,11 @@ mdviewer/
 ├─ src/                     # 前端源码（TypeScript）
 │  ├─ main.ts               # 装配：状态管理、文件/导出/主题/侧边栏、快捷键表
 │  ├─ editor.ts             # CodeMirror 6 封装（主题切换、光标/文档事件）
+│  ├─ format.ts             # 编辑排版快捷键（加粗/斜体/标题/链接，toggle 语义）
 │  ├─ files.ts              # 文件对话框 + read_file / write_file 命令调用
 │  ├─ exporter.ts           # 导出：自包含 HTML 组装 / iframe 打印（PDF）
 │  ├─ sidebar.ts            # 文件树侧边栏（懒加载展开、当前文件高亮）
+│  ├─ splitter.ts           # 编辑/预览分栏拖拽（比例持久化、双击复位）
 │  ├─ enhance.ts            # 预览/导出共用增强：KaTeX 公式 + Mermaid 图表
 │  ├─ outline.ts            # 大纲提取（跳过围栏）与点击跳转定位
 │  ├─ theme.ts              # 三态主题管理（跟随系统 / 浅色 / 深色）
@@ -125,3 +127,6 @@ mdviewer/
 | 3 | 同步滚动、文件树、主题、快捷键 | ✅ |
 | 4 | 公式 / Mermaid、大纲、全文搜索 | ✅ |
 | 5 | 三平台安装包、自动更新 | ✅ 当前 |
+
+> 路线图外增量：编辑 / 预览中缝可拖动调宽（比例持久化，双击复位）；
+> 编辑器内排版快捷键 Ctrl+B/I/E/Shift+X/K、Ctrl+1~6（toggle 语义，见应用内欢迎文档）。

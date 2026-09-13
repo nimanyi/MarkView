@@ -26,6 +26,7 @@ import {
 import { createSidebar, type Sidebar } from "./sidebar";
 import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
+import { initSplitter } from "./splitter";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
@@ -86,6 +87,20 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
 | Ctrl+Shift+U | 检查更新 |
+
+## 编辑排版（光标在编辑器内时）
+
+| 快捷键 | 功能 |
+| --- | --- |
+| Ctrl+B | 加粗（再按取消） |
+| Ctrl+I | 斜体 |
+| Ctrl+E | 行内代码 |
+| Ctrl+Shift+X | 删除线 |
+| Ctrl+K | 插入链接（选区作文字） |
+| Ctrl+1 ~ Ctrl+6 | 设为 H1~H6 标题（同键再按取消） |
+
+> 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
+> 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
 
 ## GFM 特性
 
@@ -520,6 +535,14 @@ view = createEditor(
 
 /* 同步滚动：编辑器与预览按比例双向联动 */
 bindSyncScroll(view.scrollDOM, preview);
+
+/* 分栏分隔条：拖动调节编辑 / 预览宽度（比例持久化，双击复位） */
+initSplitter({
+  panes: document.querySelector<HTMLElement>(".panes")!,
+  sidebar: document.querySelector<HTMLElement>("#sidebar")!,
+  editorHost,
+  divider: document.querySelector<HTMLElement>("#pane-divider")!,
+});
 
 /* ---------- 按钮 ---------- */
 

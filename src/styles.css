@@ -430,6 +430,40 @@ body.sidebar-hidden .panes .sidebar {
   overflow: hidden;
 }
 
+/* 分栏分隔条：拖动调节编辑 / 预览宽度（splitter.ts 控制编辑区宽度百分比） */
+.pane-divider {
+  flex: none;
+  width: 6px;
+  margin: 0 -3px; /* 压住 editor-host 右边框，命中区域更宽 */
+  padding: 0 2px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 5;
+  transition: background-color 0.15s ease;
+}
+
+.pane-divider::after {
+  content: "";
+  position: absolute;
+  inset: 0 2px;
+  border-radius: 3px;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.pane-divider:hover::after,
+.pane-divider.dragging::after {
+  background: var(--accent, #4c8bf5);
+  opacity: 0.55;
+}
+
+/* 拖动中：全局禁选中文本、光标保持水平调整形状 */
+body.dragging-panes {
+  cursor: col-resize;
+  user-select: none;
+}
+
 /* CodeMirror 容器铺满 */
 .editor-host .cm-editor {
   height: 100%;
