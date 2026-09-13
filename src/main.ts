@@ -28,6 +28,7 @@ import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
 import { initFormatBar, updateFormatBar } from "./toolbar";
+import { initSettingsDialog, openSettingsDialog } from "./settings";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
@@ -61,6 +62,8 @@ const btnSave = document.querySelector<HTMLButtonElement>("#btn-save")!;
 const btnSaveAs = document.querySelector<HTMLButtonElement>("#btn-save-as")!;
 const btnExportHtml = document.querySelector<HTMLButtonElement>("#btn-export-html")!;
 const btnExportPdf = document.querySelector<HTMLButtonElement>("#btn-export-pdf")!;
+const btnSettings = document.querySelector<HTMLButtonElement>("#btn-settings")!;
+const btnHelp = document.querySelector<HTMLButtonElement>("#btn-help")!;
 const btnTheme = document.querySelector<HTMLButtonElement>("#btn-theme")!;
 const btnToggleSidebar = document.querySelector<HTMLButtonElement>("#btn-toggle-sidebar")!;
 const btnRefreshTree = document.querySelector<HTMLButtonElement>("#btn-refresh-tree")!;
@@ -68,6 +71,8 @@ const btnUpdate = document.querySelector<HTMLButtonElement>("#btn-update")!;
 const appVersionEl = document.querySelector<HTMLElement>("#app-version")!;
 const unsavedDlg = document.querySelector<HTMLDialogElement>("#unsaved-dialog")!;
 const unsavedText = document.querySelector<HTMLElement>("#unsaved-text")!;
+const helpDlg = document.querySelector<HTMLDialogElement>("#help-dialog")!;
+const helpVersionEl = document.querySelector<HTMLElement>("#help-version")!;
 
 const win = getCurrentWindow();
 
@@ -89,6 +94,8 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
 | Alt+T | 显示 / 隐藏排版工具栏 |
+| Ctrl+, | 设置（主题 / 字号 / 同步滚动） |
+| Ctrl+Shift+H | 使用说明 |
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
 | Ctrl+Shift+U | 检查更新 |
@@ -553,6 +560,24 @@ initFormatBar({
   showBtn: formatBarShow,
 });
 
+/* 设置面板：字号 / 同步滚动即时生效；主题改动联动编辑器与预览（同 doCycleTheme） */
+initSettingsDialog({
+  onTheme(mode) {
+    applyEditorTheme(view, isDark(mode));
+    updateThemeLabel(mode);
+    scheduleRender(); // Mermaid 主题跟随：切换后重渲染预览
+  },
+});
+
+/* 使用说明对话框：底部按钮或点击遮罩关闭 */
+btnHelp.addEventListener("click", () => helpDlg.showModal());
+helpDlg.querySelector(".dialog-actions")!.addEventListener("click", (e) => {
+  if ((e.target as HTMLElement).closest("button")) helpDlg.close();
+});
+helpDlg.addEventListener("click", (e) => {
+  if (e.target === helpDlg) helpDlg.close();
+});
+
 /* 同步滚动：编辑器与预览按比例双向联动 */
 bindSyncScroll(view.scrollDOM, preview);
 
@@ -573,6 +598,7 @@ btnSave.addEventListener("click", () => void doSave());
 btnSaveAs.addEventListener("click", () => void doSaveAs());
 btnExportHtml.addEventListener("click", () => void doExportHtml());
 btnExportPdf.addEventListener("click", () => void doExportPdf());
+btnSettings.addEventListener("click", () => openSettingsDialog());
 btnTheme.addEventListener("click", doCycleTheme);
 btnToggleSidebar.addEventListener("click", toggleSidebar);
 btnRefreshTree.addEventListener("click", () => void sidebar.refresh());
@@ -593,6 +619,8 @@ installShortcuts([
   { key: "s", shift: true, label: "另存为", run: () => void doSaveAs() },
   { key: "e", shift: true, label: "导出 HTML", run: () => void doExportHtml() },
   { key: "p", label: "打印 / 导出 PDF", run: () => void doExportPdf() },
+  { key: ",", label: "设置", run: () => openSettingsDialog() },
+  { key: "h", shift: true, label: "使用说明", run: () => helpDlg.showModal() },
   { key: "\\", label: "切换侧边栏", run: toggleSidebar },
   { key: "l", shift: true, label: "切换主题", run: doCycleTheme },
   { key: "f", shift: true, label: "全文搜索", run: focusSearch },
@@ -620,10 +648,11 @@ syncChrome();
 syncStats(view);
 updateThemeLabel(currentMode());
 btnUpdate.addEventListener("click", () => void doCheckUpdate());
-/* 状态栏显示当前版本（getVersion 来自 tauri.conf.json） */
+/* 状态栏显示当前版本（getVersion 来自 tauri.conf.json），说明页同步展示 */
 void getVersion()
   .then((v) => {
     appVersionEl.textContent = `v${v}`;
+    helpVersionEl.textContent = `v${v}`;
   })
   .catch(() => {
     appVersionEl.textContent = "";

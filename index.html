@@ -19,6 +19,8 @@
           <button id="btn-save-as" class="tool-btn" title="另存为（Ctrl+Shift+S）">另存为</button>
           <button id="btn-export-html" class="tool-btn" title="导出为独立 HTML 文件（Ctrl+Shift+E）">导出 HTML</button>
           <button id="btn-export-pdf" class="tool-btn" title="打印 / 另存为 PDF（Ctrl+P）">导出 PDF</button>
+          <button id="btn-settings" class="tool-btn" title="设置（Ctrl+,）">设置</button>
+          <button id="btn-help" class="tool-btn" title="使用说明（Ctrl+Shift+H）">说明</button>
           <button id="btn-theme" class="tool-btn" title="切换主题（Ctrl+Shift+L）">主题：跟随系统</button>
           <button id="btn-toggle-sidebar" class="tool-btn" title="切换侧边栏（Ctrl+\）">侧栏</button>
         </span>
@@ -69,6 +71,106 @@
         <span class="footer-brand">comrak · GFM</span>
       </footer>
     </main>
+    <dialog id="settings-dialog" class="panel-dialog" aria-labelledby="settings-title">
+      <h2 id="settings-title" class="dialog-heading">设置</h2>
+      <p class="dialog-hint">改动即时生效并自动保存</p>
+      <div class="panel-body">
+        <section class="set-group">
+          <h3>外观</h3>
+          <div class="set-row">
+            <span class="set-label">主题</span>
+            <div id="theme-seg" class="seg" role="radiogroup" aria-label="主题">
+              <button type="button" class="seg-btn" data-mode="auto">跟随系统</button>
+              <button type="button" class="seg-btn" data-mode="light">浅色</button>
+              <button type="button" class="seg-btn" data-mode="dark">深色</button>
+            </div>
+          </div>
+          <div class="set-row">
+            <label class="set-label" for="set-editor-font">编辑器字号</label>
+            <input id="set-editor-font" type="range" min="12" max="20" step="1" />
+            <span class="set-value" id="editor-font-value"></span>
+          </div>
+          <div class="set-row">
+            <label class="set-label" for="set-preview-font">预览字号</label>
+            <input id="set-preview-font" type="range" min="12" max="20" step="1" />
+            <span class="set-value" id="preview-font-value"></span>
+          </div>
+        </section>
+        <section class="set-group">
+          <h3>编辑</h3>
+          <label class="set-row set-check">
+            <input id="set-sync-scroll" type="checkbox" />
+            <span>编辑区与预览区同步滚动</span>
+          </label>
+          <label class="set-row set-check">
+            <input id="set-format-bar" type="checkbox" />
+            <span>显示排版工具栏（Alt+T）</span>
+          </label>
+        </section>
+      </div>
+      <div class="dialog-actions">
+        <button value="close" class="tool-btn">关闭</button>
+      </div>
+    </dialog>
+
+    <dialog id="help-dialog" class="panel-dialog" aria-labelledby="help-title">
+      <h2 id="help-title" class="dialog-heading">MDViewer 使用说明</h2>
+      <div class="panel-body help-body">
+        <section>
+          <h3>简介</h3>
+          <p>MDViewer 是一款跨平台 Markdown 编辑 / 预览应用：左侧编辑、右侧实时预览，
+          解析由 Rust 端 comrak 完成（完整 GFM 支持），内建 KaTeX 数学公式与 Mermaid 图表渲染，
+          支持导出独立 HTML 与 PDF、文件树管理、大纲导航、全文搜索和自动更新。</p>
+        </section>
+        <section>
+          <h3>界面</h3>
+          <ul>
+            <li>侧边栏（Ctrl+\）：文件树 / 文档大纲 / 全文搜索三个标签页</li>
+            <li>编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
+            <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
+          </ul>
+        </section>
+        <section>
+          <h3>全局快捷键</h3>
+          <table>
+            <tbody>
+              <tr><td>Ctrl+N</td><td>新建文档</td></tr>
+              <tr><td>Ctrl+O / Ctrl+Shift+O</td><td>打开文件 / 打开文件夹</td></tr>
+              <tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 另存为</td></tr>
+              <tr><td>Ctrl+Shift+E / Ctrl+P</td><td>导出 HTML / 打印・PDF</td></tr>
+              <tr><td>Ctrl+\</td><td>切换侧边栏</td></tr>
+              <tr><td>Alt+T</td><td>显示 / 隐藏排版工具栏</td></tr>
+              <tr><td>Ctrl+Shift+L</td><td>循环切换主题</td></tr>
+              <tr><td>Ctrl+Shift+F</td><td>全文搜索</td></tr>
+              <tr><td>Ctrl+, / Ctrl+Shift+H</td><td>设置 / 本说明</td></tr>
+              <tr><td>Ctrl+Shift+U</td><td>检查更新</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section>
+          <h3>编辑器排版快捷键（光标在编辑器内）</h3>
+          <table>
+            <tbody>
+              <tr><td>Ctrl+B / Ctrl+I</td><td>加粗 / 斜体</td></tr>
+              <tr><td>Ctrl+E / Ctrl+Shift+X</td><td>行内代码 / 删除线</td></tr>
+              <tr><td>Ctrl+K</td><td>插入链接（选区作链接文字）</td></tr>
+              <tr><td>Ctrl+1 ~ Ctrl+6</td><td>设为 H1~H6 标题（同键再按取消）</td></tr>
+            </tbody>
+          </table>
+          <p class="dialog-hint">以上均为 toggle 语义：已包裹再按一次即取消；工具栏按钮与快捷键行为一致。</p>
+        </section>
+        <section>
+          <h3>关于</h3>
+          <p>版本 <span id="help-version"></span> · Tauri 2 + CodeMirror 6 + comrak ·
+          偏好（主题、字号、分栏比例等）保存在本机，可在设置中调整；
+          应用更新可从状态栏“检查更新”手动触发。</p>
+        </section>
+      </div>
+      <div class="dialog-actions">
+        <button value="close" class="tool-btn">关闭</button>
+      </div>
+    </dialog>
+
     <dialog id="unsaved-dialog" class="unsaved-dialog">
       <p class="dialog-text" id="unsaved-text">是否保存更改？</p>
       <div class="dialog-actions">

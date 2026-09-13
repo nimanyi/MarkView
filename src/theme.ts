@@ -65,14 +65,19 @@ export function currentMode(): ThemeMode {
   return storedMode();
 }
 
+/** 显式设置模式：持久化并应用 <html data-theme>（设置面板 / 循环切换共用） */
+export function setThemeMode(mode: ThemeMode): void {
+  localStorage.setItem(STORAGE_KEY, mode);
+  if (mode === "auto") {
+    delete document.documentElement.dataset.theme;
+  } else {
+    document.documentElement.dataset.theme = mode;
+  }
+}
+
 /** 循环切换：跟随系统 → 浅色 → 深色 → 跟随系统。返回新模式。 */
 export function cycleTheme(): ThemeMode {
   const next = MODES[(MODES.indexOf(storedMode()) + 1) % MODES.length];
-  localStorage.setItem(STORAGE_KEY, next);
-  if (next === "auto") {
-    delete document.documentElement.dataset.theme;
-  } else {
-    document.documentElement.dataset.theme = next;
-  }
+  setThemeMode(next);
   return next;
 }

@@ -4,6 +4,14 @@
  * 以"各侧上次被程序设置的时间戳"识别并忽略 150ms 内的回声，
  * 避免双向互相拉扯的抖动。
  */
+
+/* 总开关（设置面板可关掉联动），监听器保持注册只做短路 */
+let syncEnabled = true;
+
+export function setSyncScrollEnabled(enabled: boolean): void {
+  syncEnabled = enabled;
+}
+
 export function bindSyncScroll(a: HTMLElement, b: HTMLElement): void {
   const lastProgrammatic = { a: 0, b: 0 };
 
@@ -11,6 +19,7 @@ export function bindSyncScroll(a: HTMLElement, b: HTMLElement): void {
     src.addEventListener(
       "scroll",
       () => {
+        if (!syncEnabled) return;
         const now = performance.now();
         if (now - lastProgrammatic[srcKey] < 150) return; // 回声事件
         const srcMax = src.scrollHeight - src.clientHeight;

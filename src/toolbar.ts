@@ -114,6 +114,24 @@ export function updateFormatBar(view: EditorView): void {
   }
 }
 
+/* ---------- 显隐状态（模块级：Alt+T / 收起展开按钮 / 设置面板共用） ---------- */
+
+let visHost: HTMLElement | null = null;
+let visShowBtn: HTMLElement | null = null;
+let barVisible = true;
+
+export function formatBarVisible(): boolean {
+  return barVisible;
+}
+
+/** 显示 / 隐藏工具栏（持久化；隐藏后编辑区右上角浮出展开按钮） */
+export function setFormatBarVisible(v: boolean): void {
+  barVisible = v;
+  visHost?.classList.toggle("no-format-bar", !v);
+  if (visShowBtn) visShowBtn.hidden = v;
+  localStorage.setItem(STORAGE_KEY, v ? "1" : "0");
+}
+
 /* ---------- 装配 ---------- */
 
 export interface FormatBarElements {
@@ -151,12 +169,8 @@ export function initFormatBar(el: FormatBarElements): void {
   }
 
   let visible = localStorage.getItem(STORAGE_KEY) !== "0";
-  const setVisible = (v: boolean): void => {
-    visible = v;
-    editorHost.classList.toggle("no-format-bar", !v);
-    showBtn.hidden = v;
-    localStorage.setItem(STORAGE_KEY, v ? "1" : "0");
-  };
+  visHost = editorHost;
+  visShowBtn = showBtn;
 
   /* 收起按钮（工具栏右端） */
   const hideBtn = document.createElement("button");
@@ -166,13 +180,13 @@ export function initFormatBar(el: FormatBarElements): void {
   hideBtn.setAttribute("aria-label", "隐藏工具栏");
   hideBtn.innerHTML = ICONS.hide;
   hideBtn.addEventListener("mousedown", (e) => e.preventDefault());
-  hideBtn.addEventListener("click", () => setVisible(false));
+  hideBtn.addEventListener("click", () => setFormatBarVisible(false));
   bar.appendChild(hideBtn);
 
   /* 隐藏后的展开按钮（编辑区右上角） */
   showBtn.addEventListener("mousedown", (e) => e.preventDefault());
   showBtn.addEventListener("click", () => {
-    setVisible(true);
+    setFormatBarVisible(true);
     view.focus();
   });
 
@@ -180,10 +194,10 @@ export function initFormatBar(el: FormatBarElements): void {
   window.addEventListener("keydown", (e) => {
     if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && e.key.toLowerCase() === "t") {
       e.preventDefault();
-      setVisible(!visible);
+      setFormatBarVisible(!barVisible);
     }
   });
 
-  setVisible(visible);
+  setFormatBarVisible(visible);
   updateFormatBar(view);
 }

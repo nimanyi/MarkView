@@ -21,9 +21,9 @@ export interface EditorHooks {
 /** 主题舱室：系统深浅色切换时 reconfigure，无需重建编辑器 */
 const themeComp = new Compartment();
 
-/** 基础外观：跟随应用的字体与行高设定（深浅色通用） */
+/** 基础外观：跟随应用的字体与行高设定（深浅色通用；字号经 CSS 变量由设置面板调节） */
 const baseTheme = EditorView.theme({
-  "&": { height: "100%", fontSize: "14px" },
+  "&": { height: "100%", fontSize: "var(--editor-font-size, 14px)" },
   "&.cm-focused": { outline: "none" },
   ".cm-scroller": {
     fontFamily:
