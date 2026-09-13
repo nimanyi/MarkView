@@ -35,6 +35,7 @@ import {
   activeTab,
   activateNext,
   closeActiveTab,
+  dirtyLabel,
   dirtyTabs,
   findTab,
   initTabs,
@@ -141,6 +142,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 
 可同时打开多份文档：点击标签切换，Ctrl+Tab / Ctrl+Shift+Tab 循环切换，
 Ctrl+W 或中键点击关闭当前标签。标签左端圆点亮起表示该文档有未保存修改；
+右键标签可批量关闭：关闭左侧 / 右侧 / 其他 / 所有（含未保存修改时统一确认一次）；
 打开新文件不会打断当前编辑——旧文档连同修改一起留在后台标签。
 
 ## 排版工具栏
@@ -259,10 +261,10 @@ function syncStats(view: EditorView): void {
 
 /* ---------- 未保存确认（三态） ---------- */
 
-/** 未保存确认（三态）；displayName 兼容单个标签与关窗口时「等 N 个文档」 */
+/** 未保存确认（三态）；displayName 由调用方带引号，兼容单个标签与「等 N 个文档」 */
 function confirmUnsaved(displayName: string): Promise<"save" | "discard" | "cancel"> {
   return new Promise((resolve) => {
-    unsavedText.textContent = `是否保存对“${displayName}”的更改？`;
+    unsavedText.textContent = `是否保存对${displayName}的更改？`;
     const done = (value: "save" | "discard" | "cancel") => {
       unsavedDlg.close(value);
     };
@@ -652,7 +654,8 @@ initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
     view.focus();
   },
   save: (tab) => saveTab(tab),
-  confirm: (tab) => confirmUnsaved(tabLabel(tab)),
+  confirm: (tab) => confirmUnsaved(`“${tabLabel(tab)}”`),
+  confirmMany: (label) => confirmUnsaved(label),
 });
 openTab(null, SAMPLE);
 
@@ -753,11 +756,7 @@ void win.onCloseRequested(async (event) => {
   const dirty = dirtyTabs();
   if (dirty.length === 0) return;
   event.preventDefault();
-  const name =
-    dirty.length === 1
-      ? tabLabel(dirty[0])
-      : `“${tabLabel(dirty[0])}”等 ${dirty.length} 个文档`;
-  const choice = await confirmUnsaved(name);
+  const choice = await confirmUnsaved(dirtyLabel(dirty));
   if (choice === "cancel") return;
   if (choice === "save") {
     for (const tab of dirty) {

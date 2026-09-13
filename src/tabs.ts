@@ -10,6 +10,7 @@
  */
 
 import { baseName } from "./files";
+import { showContextMenu, type CtxMenuEntry } from "./contextmenu";
 
 export interface TabState {
   id: number;
@@ -25,6 +26,12 @@ export function tabLabel(tab: TabState): string {
   return tab.path ? baseName(tab.path) : "未命名";
 }
 
+/** 确认对话框用的文档名：单个直接名称，多个为「“首个”等 N 个文档」 */
+export function dirtyLabel(dirty: TabState[]): string {
+  if (dirty.length === 1) return `“${tabLabel(dirty[0])}”`;
+  return `“${tabLabel(dirty[0])}”等 ${dirty.length} 个文档`;
+}
+
 export interface TabsHooks {
   /** 读取当前编辑器状态（切换前快照旧标签用） */
   snapshot(): { text: string; anchor: number; head: number; scrollTop: number };
@@ -34,6 +41,8 @@ export interface TabsHooks {
   save(tab: TabState): Promise<boolean>;
   /** 关闭脏标签前的三态确认（复用未保存对话框） */
   confirm(tab: TabState): Promise<"save" | "discard" | "cancel">;
+  /** 批量关闭多个脏标签前的统一确认（一次问清，避免逐个弹窗） */
+  confirmMany(label: string): Promise<"save" | "discard" | "cancel">;
 }
 
 let bar: HTMLElement | null = null;
@@ -106,6 +115,11 @@ function renderTabs(): void {
         void closeTab(tab.id);
       }
     });
+    el.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // 不落入全局右键处理（复制等通用项）
+      showTabMenu(tab, e.clientX, e.clientY);
+    });
     frag.appendChild(el);
   }
   bar.replaceChildren(frag);
@@ -163,6 +177,77 @@ export async function closeTab(id: number): Promise<void> {
   } else {
     renderTabs();
   }
+}
+
+/** 右键标签菜单：单个关闭 + 批量关闭（左侧 / 右侧 / 其他 / 所有），
+ *  按位置可用性禁用，项后带数量提示 */
+function showTabMenu(tab: TabState, x: number, y: number): void {
+  const idx = tabs.indexOf(tab);
+  const left = tabs.slice(0, idx);
+  const right = tabs.slice(idx + 1);
+  const others = [...left, ...right];
+  const items: CtxMenuEntry[] = [
+    { label: "关闭标签页", run: () => void closeTab(tab.id) },
+    "sep",
+    {
+      label: `关闭左侧（${left.length} 个）`,
+      disabled: left.length === 0,
+      run: () => void closeTabs(left.map((t) => t.id)),
+    },
+    {
+      label: `关闭右侧（${right.length} 个）`,
+      disabled: right.length === 0,
+      run: () => void closeTabs(right.map((t) => t.id)),
+    },
+    {
+      label: `关闭其他（${others.length} 个）`,
+      disabled: others.length === 0,
+      run: () => void closeTabs(others.map((t) => t.id)),
+    },
+    {
+      label: `关闭所有（${tabs.length} 个）`,
+      run: () => void closeTabs(tabs.map((t) => t.id)),
+    },
+  ];
+  showContextMenu(items, x, y);
+}
+
+/** 批量关闭：范围内有脏标签时统一确认一次；
+ *  选保存则逐个写盘，任一失败（含取消另存为）即中止。
+ *  当前标签被一并关闭时优先激活其右侧第一个幸存标签（浏览器习惯）。 */
+export async function closeTabs(ids: number[]): Promise<void> {
+  if (!hooks) return;
+  const targets = tabs.filter((t) => ids.includes(t.id));
+  if (targets.length === 0) return;
+  const dirty = targets.filter((t) => t.text !== t.diskText);
+  if (dirty.length > 0) {
+    const choice = await hooks.confirmMany(dirtyLabel(dirty));
+    if (choice === "cancel") return;
+    if (choice === "save") {
+      for (const tab of dirty) {
+        if (!(await hooks.save(tab))) return; // 保存失败则中止，保留未处理的标签
+      }
+    }
+  }
+  const activeIdx = tabs.findIndex((t) => t.id === activeId);
+  const survivors = tabs.filter((t) => !ids.includes(t.id));
+  const origIndex = new Map(tabs.map((t, i) => [t.id, i] as const));
+  for (const t of targets) {
+    const i = tabs.indexOf(t);
+    if (i >= 0) tabs.splice(i, 1);
+  }
+  if (tabs.length === 0) {
+    openTab(null, "");
+    return;
+  }
+  if (tabs.some((t) => t.id === activeId)) {
+    renderTabs(); // 当前标签不在关闭范围内：仅重绘
+    return;
+  }
+  const next =
+    survivors.find((t) => (origIndex.get(t.id) ?? 0) > activeIdx) ??
+    survivors[survivors.length - 1];
+  if (next) activate(next.id);
 }
 
 /** Ctrl+W：关闭当前标签 */

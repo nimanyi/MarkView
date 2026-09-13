@@ -13,13 +13,16 @@
 
 import type { EditorView } from "@codemirror/view";
 
-interface Item {
+/** 菜单项（导出供标签条等处复用） */
+export interface CtxMenuItem {
   label: string;
   disabled?: boolean;
   run(): void;
 }
 
-type Entry = Item | "sep";
+export type CtxMenuEntry = CtxMenuItem | "sep";
+
+type Entry = CtxMenuEntry;
 
 /* ---------- 菜单单例 ---------- */
 
@@ -58,7 +61,8 @@ function ensureMenu(): HTMLDivElement {
   return menu;
 }
 
-function showMenu(items: Entry[], x: number, y: number): void {
+/** 显示菜单（单例复用），自动防视口溢出。供本模块与标签条右键菜单共用。 */
+export function showContextMenu(items: CtxMenuEntry[], x: number, y: number): void {
   const menu = ensureMenu();
   const frag = document.createDocumentFragment();
   for (const entry of items) {
@@ -237,7 +241,7 @@ export function initContextMenu(view: EditorView): void {
       const field = target.closest<HTMLInputElement>("input");
       items = field ? fieldItems(field) : plainItems(target);
     }
-    if (items.length > 0) showMenu(items, e.clientX, e.clientY);
+    if (items.length > 0) showContextMenu(items, e.clientX, e.clientY);
   });
 
   blockBrowserAccelerators();
