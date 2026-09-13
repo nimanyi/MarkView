@@ -25,13 +25,32 @@
         <span class="app-hint" id="save-hint" data-tauri-drag-region></span>
       </header>
       <section class="panes">
-        <aside class="sidebar" id="sidebar" aria-label="文件树">
-          <div class="sidebar-header">
-            <span class="sidebar-title" id="sidebar-title">文件</span>
-            <button id="btn-refresh-tree" class="tool-btn" title="刷新文件树">刷新</button>
+        <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+          <div class="sidebar-tabs" role="tablist">
+            <button class="tab-btn active" data-tab="files" role="tab">文件</button>
+            <button class="tab-btn" data-tab="outline" role="tab">大纲</button>
+            <button class="tab-btn" data-tab="search" role="tab">搜索</button>
           </div>
-          <div class="file-tree" id="file-tree"></div>
-          <div class="sidebar-empty" id="sidebar-empty">尚未打开文件夹</div>
+          <div class="sidebar-pane" data-pane="files">
+            <div class="sidebar-header">
+              <span class="sidebar-title" id="sidebar-title">文件</span>
+              <button id="btn-refresh-tree" class="tool-btn" title="刷新文件树">刷新</button>
+            </div>
+            <div class="file-tree" id="file-tree"></div>
+            <div class="sidebar-empty" id="sidebar-empty">尚未打开文件夹</div>
+          </div>
+          <div class="sidebar-pane" data-pane="outline" hidden>
+            <div class="outline-list" id="outline-list"></div>
+            <div class="sidebar-empty" id="outline-empty">文档中暂无标题</div>
+          </div>
+          <div class="sidebar-pane" data-pane="search" hidden>
+            <div class="search-box">
+              <input id="search-input" type="text" placeholder="在打开的文件夹中搜索…" />
+            </div>
+            <div class="search-results" id="search-results">
+              <div class="sidebar-empty">按 Ctrl+Shift+F 聚焦搜索</div>
+            </div>
+          </div>
         </aside>
         <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器"></div>
         <article id="preview" class="preview" aria-label="渲染预览"></article>

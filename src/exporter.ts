@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { pickSavePath, writeTextFile } from "./files";
+import { enhanceBodyHtml, KATEX_CDN_CSS } from "./enhance";
 
 /** 保存对话框的 HTML 文件类型 */
 const HTML_FILTERS = [{ name: "HTML 页面", extensions: ["html", "htm"] }];
@@ -70,6 +71,9 @@ li.task-list-item { list-style: none; margin-left: -1.2em; }
 a { color: var(--accent); }
 hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
 img { max-width: 100%; }
+.math-display { overflow-x: auto; padding: 4px 0; }
+.mermaid-figure { margin: 0.8em 0; text-align: center; overflow-x: auto; }
+.mermaid-figure svg { max-width: 100%; height: auto; }
 @media print {
   body { max-width: none; padding: 0; background: #ffffff; color: #171717; }
   pre { white-space: pre-wrap; }
@@ -93,9 +97,11 @@ export function suggestExportName(docName: string, ext: string): string {
   return docName.replace(/\.(md|markdown|mdx|txt)$/i, "") + ext;
 }
 
-/** 组装自包含 HTML 文档：body 由 Rust 端 comrak 渲染，与预览同源 */
+/** 组装自包含 HTML 文档：body 由 Rust 端 comrak 渲染，与预览同源；
+ *  公式与图表经同一增强链路处理（含数学公式时引 KaTeX 样式 CDN） */
 export async function buildStandaloneHtml(markdown: string, title: string): Promise<string> {
-  const body = await invoke<string>("parse_markdown", { source: markdown });
+  const raw = await invoke<string>("parse_markdown", { source: markdown });
+  const { html: body, hasMath } = await enhanceBodyHtml(raw);
   return [
     "<!DOCTYPE html>",
     '<html lang="zh-CN">',
@@ -103,6 +109,7 @@ export async function buildStandaloneHtml(markdown: string, title: string): Prom
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
     `<title>${escapeHtml(title)}</title>`,
+    ...(hasMath ? [`<link rel="stylesheet" href="${KATEX_CDN_CSS}">`] : []),
     "<style>",
     EXPORT_CSS,
     "</style>",

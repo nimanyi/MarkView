@@ -4,9 +4,10 @@
 
 技术栈：**Tauri 2 + Rust（comrak）+ Vite + TypeScript**
 
-> 当前为阶段 3：在编辑 / 预览 / 导出的基础上新增——
-> 编辑与预览双向同步滚动（按比例联动）、文件树侧边栏（打开文件夹、懒加载展开、
-> 当前文件高亮）、三态主题（跟随系统 / 浅色 / 深色，持久化）、表驱动快捷键体系。
+> 当前为阶段 4：新增内容增强与导航能力——
+> 数学公式（KaTeX，`$…$` / `$$…$$` / ```` ```math ````）、Mermaid 图表（懒加载、
+> 主题跟随）、大纲面板（源码行号定位、编辑器与预览双侧跳转）、
+> 跨文件全文搜索（Rust 端递归扫描，结果跳行打开）。
 > 完整快捷键见应用内欢迎文档。
 
 ## 环境要求
@@ -57,6 +58,8 @@ mdviewer/
 │  ├─ files.ts              # 文件对话框 + read_file / write_file 命令调用
 │  ├─ exporter.ts           # 导出：自包含 HTML 组装 / iframe 打印（PDF）
 │  ├─ sidebar.ts            # 文件树侧边栏（懒加载展开、当前文件高亮）
+│  ├─ enhance.ts            # 预览/导出共用增强：KaTeX 公式 + Mermaid 图表
+│  ├─ outline.ts            # 大纲提取（跳过围栏）与点击跳转定位
 │  ├─ theme.ts              # 三态主题管理（跟随系统 / 浅色 / 深色）
 │  ├─ scroll.ts             # 编辑器与预览双向同步滚动
 │  ├─ shortcut.ts           # 快捷键注册表（表驱动）
@@ -64,7 +67,7 @@ mdviewer/
 ├─ src-tauri/               # Rust 核心
 │  ├─ src/
 │  │  ├─ main.rs            # 入口
-│  │  └─ lib.rs             # Tauri 命令（parse_markdown / read_file / write_file / list_dir）
+│  │  └─ lib.rs             # Tauri 命令（parse_markdown / read_file / write_file / list_dir / search_in_dir）
 │  ├─ capabilities/         # 权限声明（对话框 + 窗口标题）
 │  ├─ icons/                # 应用图标（tauri icon 生成）
 │  ├─ tauri.conf.json       # Tauri 配置
@@ -80,6 +83,6 @@ mdviewer/
 | 0 | 脚手架 + CI + IPC 链路验证 | ✅ |
 | 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ✅ |
 | 2 | HTML / PDF 导出 | ✅ |
-| 3 | 同步滚动、文件树、主题、快捷键 | ✅ 当前 |
-| 4 | 公式 / Mermaid、大纲、全文搜索 | ⬜ |
+| 3 | 同步滚动、文件树、主题、快捷键 | ✅ |
+| 4 | 公式 / Mermaid、大纲、全文搜索 | ✅ 当前 |
 | 5 | 三平台安装包、自动更新 | ⬜ |
