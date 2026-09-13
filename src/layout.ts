@@ -47,6 +47,11 @@ export function cycleViewMode(): ViewMode {
   return next;
 }
 
+/** Ctrl+Shift+D 双态切换：隐藏 / 显示预览（仅编辑 ↔ 双栏） */
+export function togglePreview(): void {
+  setViewMode(mode === "editor" ? "split" : "editor");
+}
+
 export interface LayoutElements {
   panes: HTMLElement; // .panes 容器（编辑 + 分隔条 + 预览）
   editorHost: HTMLElement; // 编辑区（清内联宽度用）

@@ -27,7 +27,7 @@ import { createSidebar, type Sidebar } from "./sidebar";
 import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
-import { cycleViewMode, initViewMode } from "./layout";
+import { cycleViewMode, initViewMode, togglePreview } from "./layout";
 import { initFormatBar, updateFormatBar } from "./toolbar";
 import { initContextMenu } from "./contextmenu";
 import { getSettings, initSettingsDialog, openSettingsDialog } from "./settings";
@@ -96,6 +96,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
 | Ctrl+Shift+V | 切换视图（双栏 / 仅编辑 / 仅预览） |
+| Ctrl+Shift+D | 隐藏 / 显示预览（仅编辑 ↔ 双栏） |
 | Alt+T | 显示 / 隐藏排版工具栏 |
 | Ctrl+, | 设置（主题 / 视图 / 字号 / 同步滚动 / 自动保存） |
 | Ctrl+Shift+H | 使用说明 |
@@ -669,6 +670,7 @@ installShortcuts([
   { key: "h", shift: true, label: "使用说明", run: () => helpDlg.showModal() },
   { key: "\\", label: "切换侧边栏", run: toggleSidebar },
   { key: "v", shift: true, label: "切换视图（双栏 / 仅编辑 / 仅预览）", run: () => cycleViewMode() },
+  { key: "d", shift: true, label: "隐藏 / 显示预览", run: togglePreview },
   { key: "l", shift: true, label: "切换主题", run: doCycleTheme },
   { key: "f", shift: true, label: "全文搜索", run: focusSearch },
   { key: "u", shift: true, label: "检查更新", run: () => void doCheckUpdate() },
