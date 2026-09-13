@@ -27,6 +27,7 @@ import { createSidebar, type Sidebar } from "./sidebar";
 import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
+import { initFormatBar, updateFormatBar } from "./toolbar";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
@@ -41,6 +42,9 @@ import {
 
 const preview = document.querySelector<HTMLElement>("#preview")!;
 const editorHost = document.querySelector<HTMLElement>("#editor-host")!;
+const cmHost = document.querySelector<HTMLElement>("#cm-host")!;
+const formatBarEl = document.querySelector<HTMLElement>("#format-bar")!;
+const formatBarShow = document.querySelector<HTMLButtonElement>("#format-bar-show")!;
 const fileNameEl = document.querySelector<HTMLElement>("#file-name")!;
 const saveHintEl = document.querySelector<HTMLElement>("#save-hint")!;
 const statPosEl = document.querySelector<HTMLElement>("#stat-pos")!;
@@ -84,6 +88,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+Shift+E | 导出 HTML |
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
+| Alt+T | 显示 / 隐藏排版工具栏 |
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
 | Ctrl+Shift+U | 检查更新 |
@@ -101,6 +106,12 @@ const SAMPLE = `# 欢迎使用 MDViewer
 
 > 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
 > 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
+
+## 排版工具栏
+
+编辑区顶部有一排排版按钮（加粗、斜体、引用、列表、标题、表格、分隔线等），
+与上表快捷键完全同源，并随光标位置高亮当前格式。点击工具栏右侧的收起按钮
+或按 \`Alt+T\` 可隐藏；隐藏后点编辑区右上角的 ▾ 或再按 \`Alt+T\` 展开。
 
 ## GFM 特性
 
@@ -518,7 +529,7 @@ const initialDark = initTheme((dark) => {
 });
 
 view = createEditor(
-  editorHost,
+  cmHost,
   SAMPLE,
   {
     onDocChange(v) {
@@ -528,10 +539,19 @@ view = createEditor(
     },
     onCursorMove(v) {
       statPosEl.textContent = cursorLabel(v);
+      updateFormatBar(v); // 工具栏按钮高亮跟随光标 / 选区
     },
   },
   initialDark,
 );
+
+/* 编辑排版工具栏：按钮与快捷键同源（format.ts），显隐持久化，Alt+T 切换 */
+initFormatBar({
+  view,
+  bar: formatBarEl,
+  editorHost,
+  showBtn: formatBarShow,
+});
 
 /* 同步滚动：编辑器与预览按比例双向联动 */
 bindSyncScroll(view.scrollDOM, preview);

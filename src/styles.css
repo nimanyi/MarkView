@@ -423,11 +423,166 @@ body.sidebar-hidden .panes .sidebar {
 }
 
 .editor-host {
+  display: flex;
+  flex-direction: column;
+  position: relative;
   flex: 1;
   min-width: 0;
   border-right: 1px solid var(--border);
   background: var(--bg-editor);
   overflow: hidden;
+}
+
+/* CodeMirror 挂载点（工具栏在下、编辑区占满剩余高度） */
+.cm-host {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---------- 编辑排版工具栏 ---------- */
+
+.format-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-editor);
+  user-select: none;
+  overflow: hidden;
+}
+
+/* 收起态（editorHost 上切换类） */
+.editor-host.no-format-bar .format-bar {
+  display: none;
+}
+
+.fmt-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  transition: background 0.12s, color 0.12s;
+}
+
+.fmt-btn:hover {
+  background: var(--code-bg);
+  color: var(--fg);
+}
+
+.fmt-btn:active {
+  transform: translateY(1px);
+}
+
+/* 当前光标 / 选区已处于该格式 */
+.fmt-btn.active {
+  background: var(--code-bg);
+  color: var(--accent);
+}
+
+.fmt-btn svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* 文本字形按钮 */
+.g-b {
+  font-weight: 700;
+}
+
+.g-i {
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+}
+
+.g-s {
+  text-decoration: line-through;
+}
+
+.g-code {
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+  font-size: 11px;
+}
+
+.g-q {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.g-h {
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* 分组分隔竖线与右侧弹性空隙 */
+.fmt-sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 4px;
+  flex: none;
+}
+
+.fmt-spacer {
+  flex: 1;
+}
+
+.fmt-hide {
+  min-width: 22px;
+  height: 22px;
+}
+
+.fmt-hide svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* 隐藏后的展开按钮：浮在编辑区右上角，平时低调悬停显形 */
+.format-bar-show {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  z-index: 6;
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--bg-editor);
+  color: var(--fg-muted);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.45;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.format-bar-show:hover {
+  opacity: 1;
+  background: var(--code-bg);
 }
 
 /* 分栏分隔条：拖动调节编辑 / 预览宽度（splitter.ts 控制编辑区宽度百分比） */

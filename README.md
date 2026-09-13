@@ -91,7 +91,8 @@ mdviewer/
 ├─ src/                     # 前端源码（TypeScript）
 │  ├─ main.ts               # 装配：状态管理、文件/导出/主题/侧边栏、快捷键表
 │  ├─ editor.ts             # CodeMirror 6 封装（主题切换、光标/文档事件）
-│  ├─ format.ts             # 编辑排版快捷键（加粗/斜体/标题/链接，toggle 语义）
+│  ├─ format.ts             # 排版命令（加粗/斜体/标题/引用/列表/表格，toggle 语义）
+│  ├─ toolbar.ts            # 编辑区排版工具栏（按钮与快捷键同源、显隐持久化）
 │  ├─ files.ts              # 文件对话框 + read_file / write_file 命令调用
 │  ├─ exporter.ts           # 导出：自包含 HTML 组装 / iframe 打印（PDF）
 │  ├─ sidebar.ts            # 文件树侧边栏（懒加载展开、当前文件高亮）
@@ -129,4 +130,5 @@ mdviewer/
 | 5 | 三平台安装包、自动更新 | ✅ 当前 |
 
 > 路线图外增量：编辑 / 预览中缝可拖动调宽（比例持久化，双击复位）；
-> 编辑器内排版快捷键 Ctrl+B/I/E/Shift+X/K、Ctrl+1~6（toggle 语义，见应用内欢迎文档）。
+> 编辑器内排版快捷键 Ctrl+B/I/E/Shift+X/K、Ctrl+1~6（toggle 语义，见应用内欢迎文档）；
+> 编辑区顶部排版工具栏：按钮与快捷键同源、随光标高亮当前格式，Alt+T 或右上角按钮收起 / 展开（状态持久化）。

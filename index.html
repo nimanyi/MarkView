@@ -52,7 +52,11 @@
             </div>
           </div>
         </aside>
-        <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器"></div>
+        <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器">
+          <div id="format-bar" class="format-bar" role="toolbar" aria-label="Markdown 排版工具栏"></div>
+          <div id="cm-host" class="cm-host"></div>
+          <button id="format-bar-show" class="format-bar-show" type="button" title="显示排版工具栏（Alt+T）" aria-label="显示排版工具栏" hidden>&#9662;</button>
+        </div>
         <div id="pane-divider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="拖动调节编辑区与预览区宽度（双击复位）"></div>
         <article id="preview" class="preview" aria-label="渲染预览"></article>
       </section>
