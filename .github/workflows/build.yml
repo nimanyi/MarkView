@@ -1,13 +1,16 @@
-name: Build
+name: Build & Release
 
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 jobs:
+  # 日常构建：分支 / PR 触发，仅验证三平台可编译打包
   build:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     name: ${{ matrix.platform }}
     strategy:
       fail-fast: false
@@ -34,10 +37,61 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev pkg-config
 
       - name: Install frontend dependencies
         run: npm install
 
       - name: Build Tauri app
         run: npm run tauri build
+
+  # 正式发布：推送 v* 标签触发，构建三平台安装包 + 更新器签名与 latest.json
+  release:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    permissions:
+      contents: write
+    name: release (${{ matrix.platform }})
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install Linux system dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev pkg-config
+
+      - name: Install frontend dependencies
+        run: npm install
+
+      - name: Build and upload release assets
+        uses: tauri-apps/tauri-action@v0
+        env:
+          # 更新包签名私钥（本地 .tauri/mdviewer.key 的内容），见 README“自动更新”
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'MDViewer v__VERSION__'
+          releaseBody: '三平台安装包与更新文件（latest.json），支持应用内检查更新。'
+          releaseDraft: true
+          prerelease: false
+          # 上传 latest.json：客户端检查更新时拉取的清单文件
+          includeUpdaterJson: true

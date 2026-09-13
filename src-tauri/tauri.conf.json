@@ -26,13 +26,48 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "targets": ["nsis", "dmg", "deb", "appimage"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Productivity",
+    "shortDescription": "跨平台 Markdown 编辑器 / 查看器",
+    "longDescription": "MDViewer：Tauri 2 + Rust（comrak）驱动的跨平台 Markdown 编辑器，支持实时预览、公式 / 图表、大纲导航、全文搜索与 HTML / PDF 导出。",
+    "publisher": "mdviewer",
+    "copyright": "MIT License",
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    },
+    "windows": {
+      "nsis": {
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": false,
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEUwRjIxMzAxQTY0RDM5NDQKUldSRU9VMm1BUlB5NE5pTlRITG9hUVRGTndGMklRQUlsSzNIU1ZPWTg1VndvMVVyYWxCeDk2MVkK",
+      "endpoints": [
+        "https://github.com/mdviewer/mdviewer/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

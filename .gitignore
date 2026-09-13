@@ -9,6 +9,9 @@ src-tauri/gen/schemas
 # 本机专属的 cargo 配置（含绝对路径，按需自行创建，见 README）
 src-tauri/.cargo/config.toml
 
+# updater 签名私钥（绝不入库；公钥已写入 tauri.conf.json）
+.tauri/
+
 # 系统与编辑器
 .DS_Store
 Thumbs.db

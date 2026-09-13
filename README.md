@@ -4,10 +4,10 @@
 
 技术栈：**Tauri 2 + Rust（comrak）+ Vite + TypeScript**
 
-> 当前为阶段 4：新增内容增强与导航能力——
-> 数学公式（KaTeX，`$…$` / `$$…$$` / ```` ```math ````）、Mermaid 图表（懒加载、
-> 主题跟随）、大纲面板（源码行号定位、编辑器与预览双侧跳转）、
-> 跨文件全文搜索（Rust 端递归扫描，结果跳行打开）。
+> 阶段 5（最终阶段）：安装包与自动更新——
+> 三平台安装包（Windows NSIS / macOS dmg / Linux deb + AppImage）、
+> minisign 签名的自动更新（状态栏一键检查、下载进度、安装重启）、
+> tag 触发的 CI 发布流水线（自动生成 latest.json 更新清单）。
 > 完整快捷键见应用内欢迎文档。
 
 ## 环境要求
@@ -25,6 +25,10 @@
        及其依赖 DLL（libintl-8 / libiconv-2 / zlib1 / libzstd / libgcc_s_seh）
     4. `src-tauri/.cargo/config.toml`（不入库）指定 linker / dlltool / link-self-contained，见该文件注释
     5. 注意：`rustup update` 会重置 self-contained 目录，需重新放入第 3 步的文件
+    6. 工具链坑（已修复）：MSYS2 包 `libwinpthread-git` 12.0.0.r747 提供的 `libwinpthread-1.dll`
+       才导出 `clock_gettime64`；若 `bin\` 内是旧版 DLL，gcc 的 `-E` 预处理路径（windres 编
+       resource.rc 时触发）会以 0xC0000139（入口点未找到）静默失败。新版 DLL 需同时放入
+       `bin\` 与 `lib\gcc\x86_64-w64-mingw32\16.2.0\`（应用目录优先级高于 PATH）
   - **macOS**：Xcode Command Line Tools（`xcode-select --install`）
   - **Linux**：`libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf`
 
@@ -42,10 +46,37 @@ npm run tauri dev  # 开发模式（热重载）
 ## 构建发布包
 
 ```bash
+# Windows（PowerShell）：需注入签名私钥，updater 工件（.sig）才会生成
+$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content .tauri/mdviewer.key -Raw
+$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ''
 npm run tauri build
 ```
 
-产物位于 `src-tauri/target/release/bundle/`（Windows 为 NSIS 安装包 + MSI）。
+产物位于 `src-tauri/target/release/bundle/`：
+
+| 平台 | 产物 |
+| --- | --- |
+| Windows | `nsis/*.exe` 安装包 + `nsis/*.exe.sig` 签名（updater 工件） |
+| macOS | `dmg/*.dmg` + `.app.tar.gz.sig` |
+| Linux | `deb/*.deb`、`appimage/*.AppImage` + `.sig` |
+
+## 自动更新
+
+- **原理**：应用内「检查更新」（状态栏按钮或 Ctrl+Shift+U）调用 updater 插件，
+  请求 `tauri.conf.json > plugins.updater.endpoints` 指向的 `latest.json` 清单；
+  版本更新时下载安装包，用配置内 **公钥** 校验 `.sig` 签名后静默安装并重启。
+- **启用前必须修改**：`tauri.conf.json` 中 updater endpoint 的 `owner/repo`
+  （当前为占位值 `mdviewer/mdviewer`），换成你实际的 GitHub 仓库；
+  CI 发布后旧版本即可收到更新推送。
+- **CI 发布**：推送 `v*` 标签触发 release job（tauri-action）——
+  需在仓库 Settings → Secrets 配置 `TAURI_SIGNING_PRIVATE_KEY`（`.tauri/mdviewer.key` 文件内容）
+  与 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`（本仓库密钥无密码，设为空串）；
+  构建产物为 draft Release，确认后发布。
+- **私钥警示**：`.tauri/mdviewer.key` 是 minisign 私钥（已在 .gitignore，绝不入库）。
+  **一旦丢失，老用户将无法升级到新版本**（公钥烧录在已发布的安装包里，无法更换），
+  请将私钥离线备份；泄露则任何人可伪造更新包，需立即作废。
+- Linux AppImage / macOS dmg 的更新签名同样由 `createUpdaterArtifacts: true` 生成；
+  macOS 另需对 dmg 做签名公证（未配置时用户首次打开需右键信任）。
 
 ## 目录结构
 
@@ -63,16 +94,18 @@ mdviewer/
 │  ├─ theme.ts              # 三态主题管理（跟随系统 / 浅色 / 深色）
 │  ├─ scroll.ts             # 编辑器与预览双向同步滚动
 │  ├─ shortcut.ts           # 快捷键注册表（表驱动）
+│  ├─ updater.ts            # 自动更新：检查 / 下载进度 / 安装重启
 │  └─ styles.css
 ├─ src-tauri/               # Rust 核心
 │  ├─ src/
 │  │  ├─ main.rs            # 入口
 │  │  └─ lib.rs             # Tauri 命令（parse_markdown / read_file / write_file / list_dir / search_in_dir）
-│  ├─ capabilities/         # 权限声明（对话框 + 窗口标题）
+│  ├─ capabilities/         # 权限声明（对话框 + updater + process）
 │  ├─ icons/                # 应用图标（tauri icon 生成）
-│  ├─ tauri.conf.json       # Tauri 配置
+│  ├─ tauri.conf.json       # Tauri 配置（bundle 元数据 + updater 公钥）
 │  └─ Cargo.toml
-├─ .github/workflows/       # 三平台 CI
+├─ .github/workflows/       # CI：main 分支构建 + tag 发布（latest.json）
+├─ .tauri/                  # updater 签名密钥对（.gitignore，绝不入库）
 └─ app-icon.png             # 图标源文件（1024x1024）
 ```
 
@@ -84,5 +117,5 @@ mdviewer/
 | 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ✅ |
 | 2 | HTML / PDF 导出 | ✅ |
 | 3 | 同步滚动、文件树、主题、快捷键 | ✅ |
-| 4 | 公式 / Mermaid、大纲、全文搜索 | ✅ 当前 |
-| 5 | 三平台安装包、自动更新 | ⬜ |
+| 4 | 公式 / Mermaid、大纲、全文搜索 | ✅ |
+| 5 | 三平台安装包、自动更新 | ✅ 当前 |

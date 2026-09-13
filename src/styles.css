@@ -465,6 +465,12 @@ body.sidebar-hidden .panes .sidebar {
   letter-spacing: 0.04em;
 }
 
+/* 状态栏里的“检查更新”按钮：比工具栏按钮更收敛 */
+.app-footer .footer-btn {
+  padding: 2px 10px;
+  font-size: 12px;
+}
+
 /* ---------- 未保存确认对话框 ---------- */
 
 .unsaved-dialog {

@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getVersion } from "@tauri-apps/api/app";
 import { EditorView } from "@codemirror/view";
 import "katex/dist/katex.min.css";
 import {
@@ -25,6 +26,7 @@ import {
 import { createSidebar, type Sidebar } from "./sidebar";
 import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
+import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
 import {
@@ -57,6 +59,8 @@ const btnExportPdf = document.querySelector<HTMLButtonElement>("#btn-export-pdf"
 const btnTheme = document.querySelector<HTMLButtonElement>("#btn-theme")!;
 const btnToggleSidebar = document.querySelector<HTMLButtonElement>("#btn-toggle-sidebar")!;
 const btnRefreshTree = document.querySelector<HTMLButtonElement>("#btn-refresh-tree")!;
+const btnUpdate = document.querySelector<HTMLButtonElement>("#btn-update")!;
+const appVersionEl = document.querySelector<HTMLElement>("#app-version")!;
 const unsavedDlg = document.querySelector<HTMLDialogElement>("#unsaved-dialog")!;
 const unsavedText = document.querySelector<HTMLElement>("#unsaved-text")!;
 
@@ -81,6 +85,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+\\ | 切换侧边栏 |
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
+| Ctrl+Shift+U | 检查更新 |
 
 ## GFM 特性
 
@@ -328,6 +333,24 @@ async function doExportPdf(): Promise<void> {
   }
 }
 
+/* ---------- 应用更新（下载完成后自动重启） ---------- */
+
+let updateBusy = false;
+
+async function doCheckUpdate(): Promise<void> {
+  if (updateBusy) return;
+  updateBusy = true;
+  try {
+    await checkForUpdates((text) => {
+      saveHintEl.textContent = text;
+    });
+  } catch (err) {
+    // 网络不可达 / 无更新服务器 / 签名不匹配等：降级为状态栏提示
+    saveHintEl.textContent = updateErrorText(err);
+    updateBusy = false;
+  }
+}
+
 /* ---------- 主题（三态：跟随系统 / 浅色 / 深色） ---------- */
 
 function updateThemeLabel(mode: ThemeMode): void {
@@ -530,6 +553,7 @@ installShortcuts([
   { key: "\\", label: "切换侧边栏", run: toggleSidebar },
   { key: "l", shift: true, label: "切换主题", run: doCycleTheme },
   { key: "f", shift: true, label: "全文搜索", run: focusSearch },
+  { key: "u", shift: true, label: "检查更新", run: () => void doCheckUpdate() },
 ]);
 
 /* ---------- 关闭拦截：未保存时确认 ---------- */
@@ -552,3 +576,12 @@ void renderPreview();
 syncChrome();
 syncStats(view);
 updateThemeLabel(currentMode());
+btnUpdate.addEventListener("click", () => void doCheckUpdate());
+/* 状态栏显示当前版本（getVersion 来自 tauri.conf.json） */
+void getVersion()
+  .then((v) => {
+    appVersionEl.textContent = `v${v}`;
+  })
+  .catch(() => {
+    appVersionEl.textContent = "";
+  });
