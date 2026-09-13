@@ -946,6 +946,26 @@ body.dragging-panes {
   color: var(--fg-muted);
 }
 
+/* 帮助页「关于」版权公示 */
+.about-copyright {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.about-copyright .about-line {
+  margin: 3px 0;
+  color: var(--fg);
+}
+
+.about-copyright .about-oss {
+  margin: 3px 0;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
 .panel-body {
   max-height: min(58vh, 480px);
   overflow-y: auto;
