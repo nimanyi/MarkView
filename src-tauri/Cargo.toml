@@ -1,4 +1,4 @@
-﻿[package]
+[package]
 name = "mdviewer"
 version = "0.1.2"
 description = "Cross-platform Markdown editor & viewer"
