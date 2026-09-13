@@ -4,9 +4,9 @@
 
 技术栈：**Tauri 2 + Rust（comrak）+ Vite + TypeScript**
 
-> 当前为阶段 1：CodeMirror 6 编辑器（Markdown 语法高亮、代码块多语言支持、深浅色主题）、
-> 文件打开 / 保存 / 另存为（系统对话框 + Rust 端读写）、窗口标题联动与未保存拦截。
-> HTML / PDF 导出在阶段 2 加入。
+> 当前为阶段 2：在阶段 1 编辑 / 预览的基础上新增导出——
+> HTML 为自包含文档（内嵌样式、正文与预览同源 comrak 渲染），
+> PDF 走 WebView 打印通道（`Ctrl+P`，在系统打印对话框选择"另存为 PDF"）。
 
 ## 环境要求
 
@@ -33,6 +33,10 @@ npm install        # 安装前端依赖
 npm run tauri dev  # 开发模式（热重载）
 ```
 
+> 注意：直接运行 `cargo` 命令时需在 `src-tauri/` 目录下执行——
+> linker / dlltool 等配置位于 `src-tauri/.cargo/config.toml`，cargo 从工作目录向上查找该文件，
+> 在项目根目录用 `--manifest-path` 跑会绕过配置导致链接失败。
+
 ## 构建发布包
 
 ```bash
@@ -50,6 +54,7 @@ mdviewer/
 │  ├─ main.ts               # 装配：状态管理、快捷键、标题联动、关闭拦截
 │  ├─ editor.ts             # CodeMirror 6 封装（主题切换、光标/文档事件）
 │  ├─ files.ts              # 文件对话框 + read_file / write_file 命令调用
+│  ├─ exporter.ts           # 导出：自包含 HTML 组装 / iframe 打印（PDF）
 │  └─ styles.css
 ├─ src-tauri/               # Rust 核心
 │  ├─ src/
@@ -68,8 +73,8 @@ mdviewer/
 | 阶段 | 内容 | 状态 |
 | --- | --- | --- |
 | 0 | 脚手架 + CI + IPC 链路验证 | ✅ |
-| 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ✅ 当前 |
-| 2 | HTML / PDF 导出 | ⬜ |
+| 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ✅ |
+| 2 | HTML / PDF 导出 | ✅ 当前 |
 | 3 | 同步滚动、文件树、主题、快捷键 | ⬜ |
 | 4 | 公式 / Mermaid、大纲、全文搜索 | ⬜ |
 | 5 | 三平台安装包、自动更新 | ⬜ |

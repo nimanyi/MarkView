@@ -14,6 +14,12 @@ import {
   readTextFile,
   writeTextFile,
 } from "./files";
+import {
+  buildStandaloneHtml,
+  exportHtmlFile,
+  printStandaloneHtml,
+  suggestExportName,
+} from "./exporter";
 
 const preview = document.querySelector<HTMLElement>("#preview")!;
 const editorHost = document.querySelector<HTMLElement>("#editor-host")!;
@@ -24,6 +30,8 @@ const statCountEl = document.querySelector<HTMLElement>("#stat-count")!;
 const btnOpen = document.querySelector<HTMLButtonElement>("#btn-open")!;
 const btnSave = document.querySelector<HTMLButtonElement>("#btn-save")!;
 const btnSaveAs = document.querySelector<HTMLButtonElement>("#btn-save-as")!;
+const btnExportHtml = document.querySelector<HTMLButtonElement>("#btn-export-html")!;
+const btnExportPdf = document.querySelector<HTMLButtonElement>("#btn-export-pdf")!;
 const unsavedDlg = document.querySelector<HTMLDialogElement>("#unsaved-dialog")!;
 const unsavedText = document.querySelector<HTMLElement>("#unsaved-text")!;
 
@@ -41,6 +49,8 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+O | 打开文件 |
 | Ctrl+S | 保存 |
 | Ctrl+Shift+S | 另存为 |
+| Ctrl+Shift+E | 导出 HTML |
+| Ctrl+P | 打印 / 导出 PDF |
 
 ## GFM 特性
 
@@ -192,6 +202,35 @@ async function doSaveAs(): Promise<boolean> {
   }
 }
 
+/* ---------- 导出（HTML / PDF） ---------- */
+
+/** 导出为自包含 HTML：内嵌样式，正文与预览同源（comrak 渲染）。 */
+async function doExportHtml(): Promise<void> {
+  try {
+    const ok = await exportHtmlFile(
+      currentContent(),
+      docName(),
+      suggestExportName(docName(), ".html"),
+    );
+    if (ok) saveHintEl.textContent = "已导出 HTML";
+  } catch (err) {
+    saveHintEl.textContent = String(err);
+  }
+}
+
+/**
+ * 导出 PDF：经隐藏 iframe 调起 WebView 打印通道，
+ * 在系统打印对话框中选择"另存为 PDF"。
+ */
+async function doExportPdf(): Promise<void> {
+  try {
+    const html = await buildStandaloneHtml(currentContent(), docName());
+    printStandaloneHtml(html);
+  } catch (err) {
+    saveHintEl.textContent = String(err);
+  }
+}
+
 /* ---------- 编辑器装配 ---------- */
 
 const view = createEditor(editorHost, SAMPLE, {
@@ -208,6 +247,8 @@ const view = createEditor(editorHost, SAMPLE, {
 btnOpen.addEventListener("click", () => void doOpen());
 btnSave.addEventListener("click", () => void doSave());
 btnSaveAs.addEventListener("click", () => void doSaveAs());
+btnExportHtml.addEventListener("click", () => void doExportHtml());
+btnExportPdf.addEventListener("click", () => void doExportPdf());
 
 window.addEventListener("keydown", (e) => {
   const mod = e.ctrlKey || e.metaKey;
@@ -219,6 +260,12 @@ window.addEventListener("keydown", (e) => {
   } else if (key === "s") {
     e.preventDefault();
     void (e.shiftKey ? doSaveAs() : doSave());
+  } else if (key === "p") {
+    e.preventDefault();
+    void doExportPdf();
+  } else if (key === "e" && e.shiftKey) {
+    e.preventDefault();
+    void doExportHtml();
   }
 });
 

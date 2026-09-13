@@ -12,9 +12,12 @@ export async function pickOpenPath(): Promise<string | null> {
   return typeof selected === "string" ? selected : null;
 }
 
-/** 弹出系统"保存文件"对话框，返回目标路径（取消返回 null） */
-export async function pickSavePath(defaultPath?: string): Promise<string | null> {
-  const path = await save({ filters: MD_FILTERS, defaultPath });
+/** 弹出系统"保存文件"对话框，返回目标路径（取消返回 null）。filters 可指定保存类型 */
+export async function pickSavePath(
+  defaultPath?: string,
+  filters: { name: string; extensions: string[] }[] = MD_FILTERS,
+): Promise<string | null> {
+  const path = await save({ filters, defaultPath });
   return path ?? null;
 }
 
