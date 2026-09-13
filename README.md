@@ -4,8 +4,9 @@
 
 技术栈：**Tauri 2 + Rust（comrak）+ Vite + TypeScript**
 
-> 当前为阶段 0（脚手架）：编辑区输入 → Rust 端 comrak 解析 → IPC 回传 → 预览区渲染，
-> 跨语言链路已打通。CodeMirror 编辑器、文件读写、导出在后续阶段加入。
+> 当前为阶段 1：CodeMirror 6 编辑器（Markdown 语法高亮、代码块多语言支持、深浅色主题）、
+> 文件打开 / 保存 / 另存为（系统对话框 + Rust 端读写）、窗口标题联动与未保存拦截。
+> HTML / PDF 导出在阶段 2 加入。
 
 ## 环境要求
 
@@ -44,15 +45,17 @@ npm run tauri build
 
 ```
 mdviewer/
-├─ index.html               # 前端入口
+├─ index.html               # 前端入口（工具栏 / 双栏 / 状态栏 / 未保存对话框）
 ├─ src/                     # 前端源码（TypeScript）
-│  ├─ main.ts               # 编辑/预览逻辑与 IPC 调用
+│  ├─ main.ts               # 装配：状态管理、快捷键、标题联动、关闭拦截
+│  ├─ editor.ts             # CodeMirror 6 封装（主题切换、光标/文档事件）
+│  ├─ files.ts              # 文件对话框 + read_file / write_file 命令调用
 │  └─ styles.css
 ├─ src-tauri/               # Rust 核心
 │  ├─ src/
 │  │  ├─ main.rs            # 入口
-│  │  └─ lib.rs             # Tauri 命令（parse_markdown 等）
-│  ├─ capabilities/         # 权限声明
+│  │  └─ lib.rs             # Tauri 命令（parse_markdown / read_file / write_file）
+│  ├─ capabilities/         # 权限声明（对话框 + 窗口标题）
 │  ├─ icons/                # 应用图标（tauri icon 生成）
 │  ├─ tauri.conf.json       # Tauri 配置
 │  └─ Cargo.toml
@@ -64,8 +67,8 @@ mdviewer/
 
 | 阶段 | 内容 | 状态 |
 | --- | --- | --- |
-| 0 | 脚手架 + CI + IPC 链路验证 | ✅ 当前 |
-| 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ⬜ |
+| 0 | 脚手架 + CI + IPC 链路验证 | ✅ |
+| 1 | CodeMirror 6 编辑器、文件打开/保存、实时预览 | ✅ 当前 |
 | 2 | HTML / PDF 导出 | ⬜ |
 | 3 | 同步滚动、文件树、主题、快捷键 | ⬜ |
 | 4 | 公式 / Mermaid、大纲、全文搜索 | ⬜ |

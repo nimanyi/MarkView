@@ -8,15 +8,35 @@
   </head>
   <body>
     <main class="app">
-      <header class="app-header">
-        <span class="app-name">MDViewer</span>
-        <span class="app-hint">脚手架预览 · 解析由 Rust 端 comrak 完成（IPC 链路已打通）</span>
+      <header class="app-header" data-tauri-drag-region>
+        <span class="app-name" data-tauri-drag-region>MDViewer</span>
+        <span class="file-name" id="file-name" data-tauri-drag-region>未命名.md</span>
+        <span class="toolbar">
+          <button id="btn-open" class="tool-btn" title="打开文件（Ctrl+O）">打开</button>
+          <button id="btn-save" class="tool-btn" title="保存（Ctrl+S）">保存</button>
+          <button id="btn-save-as" class="tool-btn" title="另存为（Ctrl+Shift+S）">另存为</button>
+        </span>
+        <span class="app-hint" id="save-hint" data-tauri-drag-region></span>
       </header>
       <section class="panes">
-        <textarea id="editor" spellcheck="false" aria-label="Markdown 源码"></textarea>
+        <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器"></div>
         <article id="preview" class="preview" aria-label="渲染预览"></article>
       </section>
+      <footer class="app-footer">
+        <span id="stat-pos">行 1，列 1</span>
+        <span id="stat-count">0 字符</span>
+        <span class="spacer"></span>
+        <span class="footer-brand">comrak · GFM</span>
+      </footer>
     </main>
+    <dialog id="unsaved-dialog" class="unsaved-dialog">
+      <p class="dialog-text" id="unsaved-text">是否保存更改？</p>
+      <div class="dialog-actions">
+        <button value="save" class="tool-btn primary">保存</button>
+        <button value="discard" class="tool-btn">不保存</button>
+        <button value="cancel" class="tool-btn">取消</button>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

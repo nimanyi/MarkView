@@ -32,13 +32,11 @@ body {
   font-family: "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   background: var(--bg);
   color: var(--fg);
+  overflow: hidden;
 }
 
-#editor,
 .preview {
-  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
   font-size: 14px;
-  line-height: 1.7;
 }
 
 .app {
@@ -47,28 +45,82 @@ body {
   height: 100vh;
 }
 
-/* 顶栏：预留拖拽区域 */
+/* ---------- 顶栏（可拖拽区域） ---------- */
+
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border);
   user-select: none;
+  flex: none;
 }
 
 .app-name {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   letter-spacing: 0.02em;
+}
+
+.file-name {
+  font-size: 13px;
+  color: var(--fg-muted);
+  max-width: 30vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-name.dirty {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.toolbar {
+  display: flex;
+  gap: 6px;
+}
+
+.tool-btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.tool-btn:hover {
+  background: var(--code-bg);
+}
+
+.tool-btn:active {
+  transform: translateY(1px);
+}
+
+.tool-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.tool-btn.primary:hover {
+  filter: brightness(1.08);
 }
 
 .app-hint {
   font-size: 12px;
   color: var(--fg-muted);
+  margin-left: auto;
 }
 
-/* 双栏布局：左编辑右预览 */
+/* ---------- 双栏布局：左编辑右预览 ---------- */
+
 .panes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -76,23 +128,74 @@ body {
   flex: 1;
 }
 
-#editor {
-  border: none;
+.editor-host {
   border-right: 1px solid var(--border);
-  resize: none;
-  outline: none;
-  padding: 16px 20px;
   background: var(--bg-editor);
-  color: var(--fg);
-  tab-size: 4;
+  overflow: hidden;
+}
+
+/* CodeMirror 容器铺满 */
+.editor-host .cm-editor {
+  height: 100%;
 }
 
 .preview {
   padding: 16px 24px;
   overflow-y: auto;
+  line-height: 1.7;
+}
+
+/* ---------- 状态栏 ---------- */
+
+.app-footer {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 4px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--fg-muted);
+  user-select: none;
+  flex: none;
+}
+
+.app-footer .spacer {
+  flex: 1;
+}
+
+.footer-brand {
+  letter-spacing: 0.04em;
+}
+
+/* ---------- 未保存确认对话框 ---------- */
+
+.unsaved-dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--fg);
+  padding: 20px 24px 16px;
+  min-width: 320px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+.unsaved-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dialog-text {
+  margin: 0 0 16px;
+  font-size: 14px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /* ---------- 预览区排版 ---------- */
+
 .preview h1,
 .preview h2,
 .preview h3 {
@@ -126,6 +229,7 @@ body {
   border-radius: 4px;
   padding: 0.15em 0.4em;
   font-size: 0.9em;
+  font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 }
 
 .preview pre {
