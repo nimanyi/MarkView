@@ -12,15 +12,27 @@
         <span class="app-name" data-tauri-drag-region>MDViewer</span>
         <span class="file-name" id="file-name" data-tauri-drag-region>未命名.md</span>
         <span class="toolbar">
+          <button id="btn-new" class="tool-btn" title="新建文档（Ctrl+N）">新建</button>
           <button id="btn-open" class="tool-btn" title="打开文件（Ctrl+O）">打开</button>
+          <button id="btn-open-dir" class="tool-btn" title="打开文件夹（Ctrl+Shift+O）">打开文件夹</button>
           <button id="btn-save" class="tool-btn" title="保存（Ctrl+S）">保存</button>
           <button id="btn-save-as" class="tool-btn" title="另存为（Ctrl+Shift+S）">另存为</button>
           <button id="btn-export-html" class="tool-btn" title="导出为独立 HTML 文件（Ctrl+Shift+E）">导出 HTML</button>
           <button id="btn-export-pdf" class="tool-btn" title="打印 / 另存为 PDF（Ctrl+P）">导出 PDF</button>
+          <button id="btn-theme" class="tool-btn" title="切换主题（Ctrl+Shift+L）">主题：跟随系统</button>
+          <button id="btn-toggle-sidebar" class="tool-btn" title="切换侧边栏（Ctrl+\）">侧栏</button>
         </span>
         <span class="app-hint" id="save-hint" data-tauri-drag-region></span>
       </header>
       <section class="panes">
+        <aside class="sidebar" id="sidebar" aria-label="文件树">
+          <div class="sidebar-header">
+            <span class="sidebar-title" id="sidebar-title">文件</span>
+            <button id="btn-refresh-tree" class="tool-btn" title="刷新文件树">刷新</button>
+          </div>
+          <div class="file-tree" id="file-tree"></div>
+          <div class="sidebar-empty" id="sidebar-empty">尚未打开文件夹</div>
+        </aside>
         <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器"></div>
         <article id="preview" class="preview" aria-label="渲染预览"></article>
       </section>

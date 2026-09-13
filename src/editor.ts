@@ -36,11 +36,15 @@ function preferDark(): boolean {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-/** 在给定容器内创建 CodeMirror 6 Markdown 编辑器 */
+/**
+ * 在给定容器内创建 CodeMirror 6 Markdown 编辑器。
+ * initialDark 指定初始深浅色（由 theme.ts 决定），后续经 applyEditorTheme 切换。
+ */
 export function createEditor(
   parent: HTMLElement,
   initialDoc: string,
   hooks: EditorHooks,
+  initialDark = preferDark(),
 ): EditorView {
   const view = new EditorView({
     doc: initialDoc,
@@ -55,7 +59,7 @@ export function createEditor(
       }),
       EditorView.lineWrapping,
       baseTheme,
-      themeComp.of(preferDark() ? oneDark : []),
+      themeComp.of(initialDark ? oneDark : []),
       EditorView.updateListener.of((u: ViewUpdate) => {
         if (u.docChanged) hooks.onDocChange(u.view);
         if (u.selectionSet || u.docChanged) hooks.onCursorMove(u.view);
@@ -63,16 +67,14 @@ export function createEditor(
     ],
   });
 
-  // 跟随系统深浅色切换主题
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", () => {
-      view.dispatch({
-        effects: themeComp.reconfigure(preferDark() ? oneDark : []),
-      });
-    });
-
   return view;
+}
+
+/** 运行时切换编辑器深浅色主题（theme.ts 调用，Compartment 重配无需重建） */
+export function applyEditorTheme(view: EditorView, dark: boolean): void {
+  view.dispatch({
+    effects: themeComp.reconfigure(dark ? oneDark : []),
+  });
 }
 
 /** 整体替换编辑器内容（打开文件 / 恢复文档） */
