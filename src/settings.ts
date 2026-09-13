@@ -16,12 +16,14 @@ export interface Settings {
   editorFont: number;
   previewFont: number;
   syncScroll: boolean;
+  /** 自动保存：停止输入 2 秒后写回已打开的文件（未命名文档跳过） */
+  autoSave: boolean;
 }
 
 const STORAGE_KEY = "mdviewer.settings";
 const FONT_MIN = 12;
 const FONT_MAX = 20;
-const DEFAULTS: Settings = { editorFont: 14, previewFont: 14, syncScroll: true };
+const DEFAULTS: Settings = { editorFont: 14, previewFont: 14, syncScroll: true, autoSave: true };
 
 function clampFont(v: unknown, fallback: number): number {
   const n = Number(v);
@@ -38,10 +40,18 @@ export function loadSettings(): Settings {
       editorFont: clampFont(v.editorFont, DEFAULTS.editorFont),
       previewFont: clampFont(v.previewFont, DEFAULTS.previewFont),
       syncScroll: v.syncScroll === undefined ? DEFAULTS.syncScroll : !!v.syncScroll,
+      autoSave: v.autoSave === undefined ? DEFAULTS.autoSave : !!v.autoSave,
     };
   } catch {
     return { ...DEFAULTS };
   }
+}
+
+/* 当前生效的设置（main.ts 的自动保存逻辑读取；对话框改动即时更新） */
+let settings = loadSettings();
+
+export function getSettings(): Settings {
+  return settings;
 }
 
 function saveSettings(s: Settings): void {
@@ -78,8 +88,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
   const previewFontVal = document.querySelector<HTMLElement>("#preview-font-value")!;
   const syncScrollEl = document.querySelector<HTMLInputElement>("#set-sync-scroll")!;
   const formatBarEl = document.querySelector<HTMLInputElement>("#set-format-bar")!;
-
-  let settings = loadSettings();
+  const autoSaveEl = document.querySelector<HTMLInputElement>("#set-autosave")!;
 
   /* 打开时把各控件同步为当前状态 */
   const syncUI = (): void => {
@@ -91,6 +100,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     previewFontVal.textContent = `${settings.previewFont}px`;
     syncScrollEl.checked = settings.syncScroll;
     formatBarEl.checked = formatBarVisible();
+    autoSaveEl.checked = settings.autoSave;
   };
 
   const commit = (): void => {
@@ -127,6 +137,12 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
 
   syncScrollEl.addEventListener("change", () => {
     settings.syncScroll = syncScrollEl.checked;
+    commit();
+  });
+
+  /* 自动保存开关：只改设置状态，保存调度由 main.ts 的文档回调驱动 */
+  autoSaveEl.addEventListener("change", () => {
+    settings.autoSave = autoSaveEl.checked;
     commit();
   });
 

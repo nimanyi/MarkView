@@ -28,7 +28,7 @@ import { bindSyncScroll } from "./scroll";
 import { installShortcuts } from "./shortcut";
 import { initSplitter } from "./splitter";
 import { initFormatBar, updateFormatBar } from "./toolbar";
-import { initSettingsDialog, openSettingsDialog } from "./settings";
+import { getSettings, initSettingsDialog, openSettingsDialog } from "./settings";
 import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
@@ -94,7 +94,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 | Ctrl+P | 打印 / 导出 PDF |
 | Ctrl+\\ | 切换侧边栏 |
 | Alt+T | 显示 / 隐藏排版工具栏 |
-| Ctrl+, | 设置（主题 / 字号 / 同步滚动） |
+| Ctrl+, | 设置（主题 / 字号 / 同步滚动 / 自动保存） |
 | Ctrl+Shift+H | 使用说明 |
 | Ctrl+Shift+L | 切换主题 |
 | Ctrl+Shift+F | 全文搜索 |
@@ -113,6 +113,7 @@ const SAMPLE = `# 欢迎使用 MDViewer
 
 > 选中文字后按包裹类快捷键直接加标记；未选中则插入标记对，光标落在中间。
 > 中缝分隔条可左右拖动调节编辑 / 预览宽度，双击复位。
+> 从文件打开的文档默认自动保存：停止输入 2 秒后写回原文件，可在设置（Ctrl+,）中关闭。
 
 ## 排版工具栏
 
@@ -262,6 +263,7 @@ async function openPath(path: string, gotoLine = 0): Promise<void> {
     if (choice === "cancel") return;
     if (choice === "save" && !(await doSave())) return;
   }
+  cancelAutoSave(); // 换文件：旧文件的待保存任务作废
   try {
     const content = await readTextFile(path);
     currentPath = path;
@@ -295,6 +297,7 @@ async function doNew(): Promise<void> {
     if (choice === "cancel") return;
     if (choice === "save" && !(await doSave())) return;
   }
+  cancelAutoSave();
   currentPath = null;
   savedContent = "";
   setDocText(view, "");
@@ -334,6 +337,32 @@ async function doSaveAs(): Promise<boolean> {
   } catch (err) {
     saveHintEl.textContent = String(err);
     return false;
+  }
+}
+
+/* ---------- 自动保存（停止输入 2 秒后写回已打开的文件；设置可关） ---------- */
+
+const AUTO_SAVE_DELAY = 2000;
+let autoSaveTimer: number | undefined;
+
+/** 取消待执行的自动保存（手动保存 / 切换文件 / 新建时调用） */
+function cancelAutoSave(): void {
+  window.clearTimeout(autoSaveTimer);
+  autoSaveTimer = undefined;
+}
+
+/** 每次文档改动后重排：持续输入只会在停顿 2 秒后保存一次 */
+function scheduleAutoSave(): void {
+  cancelAutoSave();
+  if (!getSettings().autoSave) return;
+  if (currentPath === null || !isDirty()) return; // 未命名文档无处可写
+  autoSaveTimer = window.setTimeout(() => void autoSaveNow(), AUTO_SAVE_DELAY);
+}
+
+async function autoSaveNow(): Promise<void> {
+  if (currentPath === null || !isDirty()) return; // 等待期间可能已手动保存
+  if (await doSave()) {
+    saveHintEl.textContent = "已自动保存"; // 覆盖 syncChrome 的“已保存”，下次改动会刷新
   }
 }
 
@@ -543,6 +572,7 @@ view = createEditor(
       scheduleRender();
       syncStats(v);
       syncChrome();
+      scheduleAutoSave(); // 停止输入 2 秒后自动写回（设置可关）
     },
     onCursorMove(v) {
       statPosEl.textContent = cursorLabel(v);
