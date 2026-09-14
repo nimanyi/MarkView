@@ -744,3 +744,13 @@ void getVersion()
   .catch(() => {
     appVersionEl.textContent = "";
   });
+
+/* ---------- 启动占位收尾：界面就绪后淡出移除 ----------
+   index.html 内联的 #boot（应用名 + spinner +「正在启动…」）全屏
+   覆盖首屏，掩盖外部 CSS/JS 的加载等待；此处全部初始化完成后
+   淡出并移除，露出完整界面。 */
+const bootEl = document.getElementById("boot");
+if (bootEl) {
+  bootEl.classList.add("boot-out");
+  window.setTimeout(() => bootEl.remove(), 240);
+}

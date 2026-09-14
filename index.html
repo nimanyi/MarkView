@@ -4,9 +4,114 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MDViewer</title>
+    <!-- 启动占位：全部内联，不依赖外部 CSS/JS；界面就绪后由 main.ts 淡出移除 -->
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #f7f7f8;
+        color: #171717;
+        font-family: "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+        transition: opacity 0.2s ease;
+      }
+      /* 深浅三态与 styles.css 对齐：无 data-theme = 跟随系统 */
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme]) #boot {
+          background: #171717;
+          color: #e5e5e5;
+        }
+      }
+      :root[data-theme="dark"] #boot {
+        background: #171717;
+        color: #e5e5e5;
+      }
+      .boot-title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+      .boot-spinner {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 3px solid rgba(127, 127, 127, 0.25);
+        border-top-color: currentColor;
+        animation: boot-spin 0.8s linear infinite;
+      }
+      .boot-text {
+        font-size: 13px;
+        opacity: 0.6;
+      }
+      #boot.boot-out {
+        opacity: 0;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-spinner {
+          animation: none;
+        }
+      }
+    </style>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
+    <div id="boot" role="status" aria-label="正在启动 MDViewer">
+      <div class="boot-title">MDViewer</div>
+      <div class="boot-spinner"></div>
+      <div class="boot-text">正在启动…</div>
+    </div>
+    <script>
+      /* 主题预匹配（早于外部 CSS/JS 生效）：把已保存的主题 / 颜色风格
+         立即画到 <html data-theme> 与占位底色上，避免深色用户看到浅色闪变。
+         逻辑与 src/theme.ts 的存储约定一致：
+         - mdviewer.theme：'light' | 'dark' | 无（跟随系统）
+         - mdviewer.palette：当前颜色风格 id（'default' 或具体 id）
+         - mdviewer.palettes：自定义风格 JSON 数组（含 base / colors） */
+      (function () {
+        try {
+          var root = document.documentElement;
+          var BUILTIN_BASE = { paper: "light", green: "light", ocean: "dark", violet: "dark" };
+          var pid = localStorage.getItem("mdviewer.palette");
+          if (pid && pid !== "default") {
+            var pal = null;
+            if (BUILTIN_BASE[pid]) {
+              pal = { base: BUILTIN_BASE[pid], colors: null };
+            } else {
+              try {
+                var list = JSON.parse(localStorage.getItem("mdviewer.palettes") || "[]");
+                if (Array.isArray(list)) {
+                  pal =
+                    list.find(function (p) {
+                      return p && p.id === pid && p.colors && p.colors.bg;
+                    }) || null;
+                }
+              } catch (e) {}
+            }
+            if (pal) {
+              root.dataset.theme = pal.base;
+              var boot = document.getElementById("boot");
+              if (boot && pal.colors) {
+                boot.style.background = pal.colors.bg;
+                boot.style.color = pal.colors.fg;
+              }
+              return;
+            }
+          }
+          var mode = localStorage.getItem("mdviewer.theme");
+          if (mode === "light" || mode === "dark") root.dataset.theme = mode;
+        } catch (e) {}
+      })();
+    </script>
     <main class="app">
       <header class="app-header" data-tauri-drag-region>
         <span class="app-name" data-tauri-drag-region>MDViewer</span>

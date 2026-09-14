@@ -137,6 +137,19 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            // 启动闪屏治理：WebView 初始化完成前窗口只显示原生底色，
+            // 按系统深浅把它设为应用对应主题的背景色（浅 #f7f7f8 / 深 #171717），
+            // 与前端启动占位页、最终界面底色无缝衔接，全程无白屏；
+            // 失败（个别平台不支持等）静默忽略，退回 tauri.conf.json 的静态值。
+            use tauri::Manager;
+            if let Some(win) = app.get_webview_window("main") {
+                let dark = matches!(win.theme(), Ok(tauri::Theme::Dark));
+                let rgb = if dark { (23, 23, 23) } else { (247, 247, 248) };
+                let _ = win.set_background_color(Some(tauri::window::Color::from(rgb)));
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             parse_markdown,
             read_file,
