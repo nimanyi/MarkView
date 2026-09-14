@@ -6,10 +6,17 @@ const MD_FILTERS = [
   { name: "Markdown", extensions: ["md", "markdown", "mdx", "txt"] },
 ];
 
-/** 弹出系统"打开文件"对话框，返回所选路径（取消返回 null） */
-export async function pickOpenPath(): Promise<string | null> {
-  const selected = await open({ multiple: false, filters: MD_FILTERS });
+/** 弹出系统"打开文件"对话框（自选过滤器），返回所选路径（取消返回 null） */
+export async function pickOpenPathWith(
+  filters: { name: string; extensions: string[] }[],
+): Promise<string | null> {
+  const selected = await open({ multiple: false, filters });
   return typeof selected === "string" ? selected : null;
+}
+
+/** 弹出系统"打开文件"对话框，返回所选路径（取消返回 null） */
+export function pickOpenPath(): Promise<string | null> {
+  return pickOpenPathWith(MD_FILTERS);
 }
 
 /** 弹出系统"保存文件"对话框，返回目标路径（取消返回 null）。filters 可指定保存类型 */

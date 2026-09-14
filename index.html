@@ -101,10 +101,14 @@
     </main>
     <dialog id="settings-dialog" class="panel-dialog" aria-labelledby="settings-title">
       <h2 id="settings-title" class="dialog-heading">设置</h2>
-      <p class="dialog-hint">改动即时生效并自动保存</p>
+      <div class="set-tabs" role="tablist" aria-label="设置分组">
+        <button type="button" class="set-tab" data-tab="look" role="tab">外观</button>
+        <button type="button" class="set-tab" data-tab="font" role="tab">字号</button>
+        <button type="button" class="set-tab" data-tab="edit" role="tab">编辑</button>
+      </div>
       <div class="panel-body">
-        <section class="set-group">
-          <h3>外观</h3>
+        <!-- 外观：主题三态 + 颜色风格（自定义 / 导入 / 导出） -->
+        <section class="set-page" data-page="look">
           <div class="set-row">
             <span class="set-label">主题</span>
             <div id="theme-seg" class="seg" role="radiogroup" aria-label="主题">
@@ -113,13 +117,42 @@
               <button type="button" class="seg-btn" data-mode="dark">深色</button>
             </div>
           </div>
-          <div class="set-row">
-            <span class="set-label">视图</span>
-            <div id="view-seg" class="seg" role="radiogroup" aria-label="视图模式">
-              <button type="button" class="seg-btn" data-mode="split">双栏</button>
-              <button type="button" class="seg-btn" data-mode="editor">仅编辑</button>
-              <button type="button" class="seg-btn" data-mode="preview">仅预览</button>
+          <div class="set-row set-row-top">
+            <span class="set-label">颜色风格</span>
+            <div class="palette-wrap">
+              <div id="palette-list" class="palette-list"></div>
+              <div class="palette-actions">
+                <button type="button" id="palette-custom" class="tool-btn">自定义…</button>
+                <button type="button" id="palette-edit" class="tool-btn" hidden>编辑当前</button>
+                <button type="button" id="palette-import" class="tool-btn" title="从 JSON 文件导入风格">导入…</button>
+                <button type="button" id="palette-export" class="tool-btn" title="导出自定义风格为 JSON（可分享 / 上架风格市场）">导出</button>
+              </div>
+              <p class="palette-hint" id="palette-hint"></p>
+              <div id="palette-editor" class="palette-editor" hidden>
+                <div class="set-row">
+                  <label class="set-label" for="palette-name">名称</label>
+                  <input id="palette-name" type="text" maxlength="16" placeholder="我的风格" />
+                  <div id="palette-base-seg" class="seg" role="radiogroup" aria-label="底色">
+                    <button type="button" class="seg-btn" data-base="light">浅色底</button>
+                    <button type="button" class="seg-btn" data-base="dark">深色底</button>
+                  </div>
+                </div>
+                <div id="palette-colors" class="palette-colors"></div>
+                <div class="palette-actions">
+                  <button type="button" id="palette-save" class="tool-btn primary">保存风格</button>
+                  <button type="button" id="palette-cancel" class="tool-btn">取消</button>
+                  <button type="button" id="palette-delete" class="tool-btn" hidden>删除此风格</button>
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
+        <!-- 字号：界面 / 编辑器 / 预览三个滑杆 -->
+        <section class="set-page" data-page="font" hidden>
+          <div class="set-row">
+            <label class="set-label" for="set-ui-font">界面字号</label>
+            <input id="set-ui-font" type="range" min="12" max="18" step="1" />
+            <span class="set-value" id="ui-font-value"></span>
           </div>
           <div class="set-row">
             <label class="set-label" for="set-editor-font">编辑器字号</label>
@@ -132,8 +165,16 @@
             <span class="set-value" id="preview-font-value"></span>
           </div>
         </section>
-        <section class="set-group">
-          <h3>编辑</h3>
+        <!-- 编辑：视图模式与编辑行为开关 -->
+        <section class="set-page" data-page="edit" hidden>
+          <div class="set-row">
+            <span class="set-label">视图</span>
+            <div id="view-seg" class="seg" role="radiogroup" aria-label="视图模式">
+              <button type="button" class="seg-btn" data-mode="split">双栏</button>
+              <button type="button" class="seg-btn" data-mode="editor">仅编辑</button>
+              <button type="button" class="seg-btn" data-mode="preview">仅预览</button>
+            </div>
+          </div>
           <label class="set-row set-check">
             <input id="set-sync-scroll" type="checkbox" />
             <span>编辑区与预览区同步滚动</span>
@@ -170,6 +211,7 @@
             <li>右键菜单：按位置提供剪切 / 复制 / 粘贴、复制链接等（浏览器默认菜单已屏蔽）</li>
             <li>编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
             <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
+            <li>设置（Ctrl+,）：主题三态、颜色风格（内置 / 自定义 7 色调色板，实时预览；可导入 / 导出 JSON 与人分享——风格市场的分发格式）、界面 / 编辑器 / 预览字号</li>
             <li>自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
             <li>多标签：可同时打开多份文档，点击标签或 Ctrl+Tab 切换，Ctrl+W / 中键关闭；右键标签可批量关闭左侧 / 右侧 / 其他 / 所有；标签圆点亮起表示有未保存修改，打开新文件不会打断当前编辑</li>
             <li>引导页：启动或关闭全部标签时显示，提供新建 / 打开文件 / 打开文件夹 / 使用说明的快捷入口</li>

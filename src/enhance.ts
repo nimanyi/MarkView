@@ -8,7 +8,7 @@
  * - 就地处理（enhancePreview）与导出处理（enhanceBodyHtml）共用同一实现
  */
 import katex from "katex";
-import { currentMode, isDark } from "./theme";
+import { effectiveDark } from "./theme";
 
 /** 渲染计数：Mermaid SVG 节点 id 唯一化 */
 let seq = 0;
@@ -41,7 +41,7 @@ async function enhanceMermaid(root: ParentNode): Promise<boolean> {
   const mermaid = (await import("mermaid")).default;
   mermaid.initialize({
     startOnLoad: false,
-    theme: isDark(currentMode()) ? "dark" : "default",
+    theme: effectiveDark() ? "dark" : "default",
     securityLevel: "strict",
   });
   for (const block of blocks) {

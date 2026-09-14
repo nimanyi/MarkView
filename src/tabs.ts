@@ -7,6 +7,8 @@
  * - 打开新文件 / 新建不再打断确认——旧文档连同未保存修改留在后台标签；
  * - 关闭脏标签（点 ×、中键、Ctrl+W）时经 hooks.confirm 三态确认；
  * - 全部标签关闭后自动补一个未命名空标签，编辑器永不为空。
+ * - 标签条单行不换行：拥挤时各标签自动收缩（见 styles.css）；
+ *   末尾常驻「+」新建按钮，空白处双击亦可新建，滚轮可横滚标签条。
  */
 
 import { baseName } from "./files";
@@ -125,7 +127,34 @@ function renderTabs(): void {
     });
     frag.appendChild(el);
   }
+  /* 末尾常驻「+」：新建未命名标签（与 Ctrl+N 等价）；样式上 sticky
+   * 固定在标签条右缘，标签溢出滚动时也始终可见可点 */
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "tab-new";
+  add.title = "新建标签页（Ctrl+N）";
+  add.setAttribute("aria-label", "新建标签页");
+  add.textContent = "+";
+  add.addEventListener("click", () => openTab(null, ""));
+  frag.appendChild(add);
   bar.replaceChildren(frag);
+  keepActiveVisible();
+}
+
+/** 标签多到溢出时的兜底：把激活标签滚入视野。
+ *  右侧多预留「+」按钮的宽度，避免刚激活的标签被固定在右缘的按钮遮住。 */
+function keepActiveVisible(): void {
+  if (!bar) return;
+  const el = bar.querySelector<HTMLElement>(".tab.active");
+  if (!el) return;
+  const plus = 40; // 「+」按钮连同留白的占位宽度
+  const barRect = bar.getBoundingClientRect();
+  const tabRect = el.getBoundingClientRect();
+  if (tabRect.right + plus > barRect.right) {
+    bar.scrollLeft += tabRect.right + plus - barRect.right;
+  } else if (tabRect.left < barRect.left) {
+    bar.scrollLeft -= barRect.left - tabRect.left;
+  }
 }
 
 /** 切换激活：先快照旧标签（引导页不进编辑器，跳过快照），再装载新标签 */
@@ -286,4 +315,19 @@ export function activateNext(dir: 1 | -1): void {
 export function initTabs(barEl: HTMLElement, h: TabsHooks): void {
   bar = barEl;
   hooks = h;
+  /* 纵向滚轮悬停在标签条上时转为横向滚动（仅当标签溢出时） */
+  barEl.addEventListener(
+    "wheel",
+    (e) => {
+      if (e.deltaY !== 0 && barEl.scrollWidth > barEl.clientWidth) {
+        barEl.scrollLeft += e.deltaY;
+      }
+    },
+    { passive: true },
+  );
+  /* 双击标签条空白处：新建标签（点在滚动条上不算） */
+  barEl.addEventListener("dblclick", (e) => {
+    if (e.target !== barEl || e.offsetX >= barEl.clientWidth) return;
+    openTab(null, "");
+  });
 }

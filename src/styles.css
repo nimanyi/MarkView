@@ -63,6 +63,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  font-size: var(--ui-font-size, 14px); /* 界面字号（设置面板）：外框文字随其缩放 */
 }
 
 /* ---------- 顶栏（可拖拽区域） ---------- */
@@ -83,7 +84,9 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  padding: 4px 8px 0;
+  /* 右侧不留 padding：收尾留白由末尾「+」按钮自身的 padding 提供，
+     避免标签溢出滚动时从 padding 缝隙里露出来 */
+  padding: 4px 0 0 8px;
   min-height: 34px;
   overflow-x: auto;
   border-bottom: 1px solid var(--border);
@@ -97,16 +100,17 @@ body {
   align-items: center;
   gap: 7px;
   max-width: 220px;
+  min-width: 54px; /* 收缩下限：保住 圆点 + 关闭按钮 的位置 */
   padding: 6px 8px 6px 10px;
   border: 1px solid transparent;
   border-bottom: none;
   border-radius: 6px 6px 0 0;
   color: var(--fg-muted);
-  font-size: 12.5px;
+  font-size: 0.9em;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  flex: none;
+  flex: 0 1 auto; /* 单行不换行：空间不足时按内容比例收缩，名称省略号截断 */
 }
 
 .tab:hover {
@@ -135,8 +139,40 @@ body {
 }
 
 .tab-name {
+  min-width: 0; /* 允许收缩到内容宽度以下，交由省略号截断 */
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 末尾「+」新建按钮：sticky 固定在标签条右缘，标签溢出滚动时始终可见；
+   不透明背景盖住滚到下方的标签，右侧 padding 兼作标签条的收尾留白 */
+.tab-new {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  flex: none;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: none;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 1.07em;
+  font-weight: 600;
+  line-height: 1;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  margin-left: 2px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tab-new:hover {
+  background: var(--code-bg);
+  color: var(--fg);
 }
 
 .tab-close {
@@ -144,7 +180,7 @@ body {
   border: none;
   background: transparent;
   color: inherit;
-  font-size: 14px;
+  font-size: 1em;
   line-height: 1;
   padding: 1px 3px;
   border-radius: 4px;
@@ -159,12 +195,12 @@ body {
 
 .app-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 1em;
   letter-spacing: 0.02em;
 }
 
 .file-name {
-  font-size: 13px;
+  font-size: 0.93em;
   color: var(--fg-muted);
   max-width: 30vw;
   overflow: hidden;
@@ -188,7 +224,7 @@ body {
   background: transparent;
   color: var(--fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   padding: 4px 12px;
   border-radius: 6px;
   cursor: pointer;
@@ -214,7 +250,7 @@ body {
 }
 
 .app-hint {
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
   margin-left: auto;
 }
@@ -289,7 +325,7 @@ body.sidebar-hidden .panes .sidebar {
 .welcome-sub {
   margin: 6px 0 24px;
   color: var(--fg-muted);
-  font-size: 13px;
+  font-size: 0.93em;
 }
 
 .welcome-actions {
@@ -309,7 +345,7 @@ body.sidebar-hidden .panes .sidebar {
   background: var(--bg);
   color: var(--fg);
   font: inherit;
-  font-size: 14px;
+  font-size: 1em;
   cursor: pointer;
 }
 
@@ -324,7 +360,7 @@ body.sidebar-hidden .panes .sidebar {
 }
 
 .welcome-btn .wc-key {
-  font-size: 11px;
+  font-size: 0.79em;
   color: var(--fg-muted);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -341,7 +377,7 @@ body.sidebar-hidden .panes .sidebar {
   margin: 24px 0 0;
   padding-left: 18px;
   color: var(--fg-muted);
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1.9;
 }
 
@@ -361,7 +397,7 @@ body.sidebar-hidden .panes .sidebar {
   background: transparent;
   color: var(--fg-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   padding: 8px 0 6px;
   cursor: pointer;
 }
@@ -395,7 +431,7 @@ body.sidebar-hidden .panes .sidebar {
 }
 
 .sidebar-title {
-  font-size: 12px;
+  font-size: 0.86em;
   font-weight: 600;
   color: var(--fg-muted);
   letter-spacing: 0.04em;
@@ -406,7 +442,7 @@ body.sidebar-hidden .panes .sidebar {
 
 .sidebar-header .tool-btn {
   padding: 2px 8px;
-  font-size: 11px;
+  font-size: 0.79em;
 }
 
 .file-tree {
@@ -417,7 +453,7 @@ body.sidebar-hidden .panes .sidebar {
 
 .sidebar-empty {
   padding: 24px 14px;
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
 }
 
@@ -432,7 +468,7 @@ body.sidebar-hidden .panes .sidebar {
   padding: 4px 8px;
   padding-left: calc(8px + (var(--level, 1) - 1) * 12px);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 0.93em;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
@@ -473,7 +509,7 @@ body.sidebar-hidden .panes .sidebar {
   background: var(--bg-editor);
   color: var(--fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   padding: 5px 8px;
 }
 
@@ -490,7 +526,7 @@ body.sidebar-hidden .panes .sidebar {
 
 .search-group-title {
   padding: 8px 12px 4px;
-  font-size: 11px;
+  font-size: 0.79em;
   font-weight: 600;
   color: var(--fg-muted);
   white-space: nowrap;
@@ -506,7 +542,7 @@ body.sidebar-hidden .panes .sidebar {
   background: transparent;
   color: var(--fg);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   padding: 4px 12px;
   cursor: pointer;
   white-space: nowrap;
@@ -564,7 +600,7 @@ body.sidebar-hidden .panes .sidebar {
   padding: 3px 6px;
   padding-left: calc(6px + var(--depth, 0) * 14px);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 0.93em;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -579,7 +615,7 @@ body.sidebar-hidden .panes .sidebar {
 .tree-row .twist {
   width: 12px;
   flex: none;
-  font-size: 10px;
+  font-size: 0.72em;
   color: var(--fg-muted);
   text-align: center;
 }
@@ -654,7 +690,7 @@ body.sidebar-hidden .panes .sidebar {
   border-radius: 6px;
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -756,7 +792,7 @@ body.sidebar-hidden .panes .sidebar {
   border-radius: 6px;
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -782,6 +818,7 @@ body.sidebar-hidden .panes .sidebar {
   border-radius: 8px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
   user-select: none;
+  font-size: var(--ui-font-size, 14px);
 }
 
 .ctx-item {
@@ -793,7 +830,7 @@ body.sidebar-hidden .panes .sidebar {
   color: var(--fg);
   text-align: left;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1;
   padding: 7px 10px;
   border-radius: 6px;
@@ -871,7 +908,7 @@ body.dragging-panes {
   gap: 20px;
   padding: 4px 16px;
   border-top: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
   user-select: none;
   flex: none;
@@ -888,7 +925,7 @@ body.dragging-panes {
 /* 状态栏里的“检查更新”按钮：比工具栏按钮更收敛 */
 .app-footer .footer-btn {
   padding: 2px 10px;
-  font-size: 12px;
+  font-size: 1em;
 }
 
 /* ---------- 未保存确认对话框 ---------- */
@@ -898,6 +935,7 @@ body.dragging-panes {
   border-radius: 12px;
   background: var(--bg);
   color: var(--fg);
+  font-size: var(--ui-font-size, 14px);
   padding: 20px 24px 16px;
   min-width: 320px;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
@@ -909,7 +947,7 @@ body.dragging-panes {
 
 .dialog-text {
   margin: 0 0 16px;
-  font-size: 14px;
+  font-size: 1em;
 }
 
 .dialog-actions {
@@ -925,6 +963,7 @@ body.dragging-panes {
   border-radius: 12px;
   background: var(--bg);
   color: var(--fg);
+  font-size: var(--ui-font-size, 14px);
   padding: 18px 22px 14px;
   width: min(520px, calc(100vw - 48px));
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
@@ -936,13 +975,13 @@ body.dragging-panes {
 
 .dialog-heading {
   margin: 0;
-  font-size: 15px;
+  font-size: 1.07em;
   font-weight: 600;
 }
 
 .dialog-hint {
   margin: 4px 0 10px;
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
 }
 
@@ -951,7 +990,7 @@ body.dragging-panes {
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
 }
 
@@ -962,7 +1001,7 @@ body.dragging-panes {
 
 .about-copyright .about-oss {
   margin: 3px 0;
-  font-size: 11px;
+  font-size: 0.79em;
   line-height: 1.7;
 }
 
@@ -973,7 +1012,7 @@ body.dragging-panes {
   background: none;
   color: var(--accent);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -987,7 +1026,7 @@ body.dragging-panes {
   background: var(--bg);
   color: var(--fg-muted);
   font: inherit;
-  font-size: 11px;
+  font-size: 0.79em;
   cursor: pointer;
 }
 
@@ -1008,9 +1047,58 @@ body.dragging-panes {
   margin-bottom: 14px;
 }
 
+/* ---------- 设置面板：标签页分组（外观 / 字号 / 编辑），内容多时免长滚动 ---------- */
+
+/* 面板加宽以容纳颜色风格 chips 与自定义编辑器（帮助页维持原宽） */
+#settings-dialog {
+  width: min(600px, calc(100vw - 48px));
+}
+
+/* 标签条：下划线式，与侧栏 tab 呼应；底线兼作正文上边框 */
+.set-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 10px 0 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.set-tab {
+  appearance: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 0.93em;
+  padding: 6px 14px;
+  margin-bottom: -1px; /* 压住标签条底线，选中时下划线与之连成一体 */
+  cursor: pointer;
+}
+
+.set-tab:hover {
+  color: var(--fg);
+}
+
+.set-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* 标签条已带底线：正文不再重复上边框 */
+#settings-dialog .panel-body {
+  border-top: none;
+  padding-top: 8px;
+}
+
+/* 字号页内容少：行距放宽，滑杆更好拖动 */
+.set-page[data-page="font"] .set-row {
+  padding: 12px 0;
+}
+
 .set-group h3 {
   margin: 2px 0 6px;
-  font-size: 12px;
+  font-size: 0.86em;
   font-weight: 600;
   color: var(--fg-muted);
   letter-spacing: 0.04em;
@@ -1021,7 +1109,7 @@ body.dragging-panes {
   align-items: center;
   gap: 10px;
   padding: 5px 0;
-  font-size: 13px;
+  font-size: 0.93em;
 }
 
 .set-label {
@@ -1034,7 +1122,7 @@ body.dragging-panes {
   flex: none;
   width: 40px;
   text-align: right;
-  font-size: 12px;
+  font-size: 0.86em;
   color: var(--fg-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -1053,7 +1141,7 @@ body.dragging-panes {
   background: transparent;
   color: var(--fg-muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.86em;
   padding: 4px 12px;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
@@ -1095,20 +1183,20 @@ body.dragging-panes {
 
 .help-body h3 {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: 0.93em;
   font-weight: 600;
 }
 
 .help-body p {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1.7;
 }
 
 .help-body ul {
   margin: 0 0 6px;
   padding-left: 20px;
-  font-size: 13px;
+  font-size: 0.93em;
   line-height: 1.9;
 }
 
@@ -1120,14 +1208,14 @@ body.dragging-panes {
 .help-body td {
   border: 1px solid var(--border);
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 0.86em;
 }
 
 .help-body td:first-child {
   width: 46%;
   color: var(--fg-muted);
   font-family: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
-  font-size: 11px;
+  font-size: 0.79em;
 }
 
 /* ---------- 预览区排版 ---------- */
@@ -1209,4 +1297,137 @@ body.dragging-panes {
   border: none;
   border-top: 1px solid var(--border);
   margin: 1.5em 0;
+}
+
+/* ---------- 颜色风格（palette）：选择 chips + 自定义调色板编辑器 ---------- */
+
+/* 「颜色风格」一行内容较高：标签与顶部对齐 */
+.set-row-top {
+  align-items: flex-start;
+}
+
+.set-row-top .set-label {
+  padding-top: 5px;
+}
+
+.palette-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 风格 chip：名称 + 三色圆点示意 */
+.palette-chip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 0.86em;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.palette-chip:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
+.palette-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.pc-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.pc-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+}
+
+.palette-chip.active .pc-dot {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.palette-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.palette-actions .tool-btn {
+  padding: 3px 10px;
+}
+
+.palette-hint {
+  margin: 6px 0 0;
+  font-size: 0.79em;
+  color: var(--fg-muted);
+  min-height: 1em;
+}
+
+/* 自定义调色板编辑器：名称 + 明暗基底 + 7 个颜色输入，改动即时预览 */
+.palette-editor {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--code-bg);
+}
+
+.palette-editor input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-editor);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.86em;
+  padding: 4px 8px;
+}
+
+.palette-editor input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.palette-colors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 6px 10px;
+}
+
+.palette-color {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86em;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.palette-color input[type="color"] {
+  width: 30px;
+  height: 22px;
+  padding: 0;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
 }

@@ -52,12 +52,10 @@ import { checkForUpdates, updateErrorText } from "./updater";
 import { enhancePreview } from "./enhance";
 import { extractOutline, gotoOutlineItem } from "./outline";
 import {
-  currentMode,
   cycleTheme,
   initTheme,
   isDark,
-  themeLabel,
-  type ThemeMode,
+  lookLabel,
 } from "./theme";
 
 const preview = document.querySelector<HTMLElement>("#preview")!;
@@ -371,15 +369,16 @@ async function doCheckUpdate(): Promise<void> {
   }
 }
 
-/* ---------- 主题（三态：跟随系统 / 浅色 / 深色） ---------- */
+/* ---------- 主题（三态：跟随系统 / 浅色 / 深色；颜色风格：覆盖 7 色） ---------- */
 
-function updateThemeLabel(mode: ThemeMode): void {
-  btnTheme.textContent = `主题：${themeLabel(mode)}`;
+function updateThemeLabel(): void {
+  // 颜色风格生效时显示风格名，否则显示三态模式名
+  btnTheme.textContent = `主题：${lookLabel()}`;
 }
 
 function doCycleTheme(): void {
   const mode = cycleTheme();
-  updateThemeLabel(mode);
+  updateThemeLabel();
   applyEditorTheme(view, isDark(mode));
   scheduleRender(); // Mermaid 主题跟随：切换后重渲染预览
 }
@@ -590,12 +589,17 @@ initFormatBar({
    换成按位置的剪切 / 复制 / 粘贴 / 全选 / 复制链接 */
 initContextMenu(view);
 
-/* 设置面板：字号 / 同步滚动即时生效；主题改动联动编辑器与预览（同 doCycleTheme） */
+/* 设置面板：字号 / 同步滚动即时生效；主题与颜色风格改动联动编辑器与预览 */
 initSettingsDialog({
   onTheme(mode) {
     applyEditorTheme(view, isDark(mode));
-    updateThemeLabel(mode);
+    updateThemeLabel();
     scheduleRender(); // Mermaid 主题跟随：切换后重渲染预览
+  },
+  onPalette(dark) {
+    applyEditorTheme(view, dark);
+    updateThemeLabel();
+    scheduleRender(); // 风格切换 / 草稿预览：Mermaid 深浅跟随
   },
 });
 
@@ -729,7 +733,7 @@ void win.onCloseRequested(async (event) => {
 void renderPreview();
 syncChrome();
 syncStats(view);
-updateThemeLabel(currentMode());
+updateThemeLabel();
 btnUpdate.addEventListener("click", () => void doCheckUpdate());
 /* 状态栏显示当前版本（getVersion 来自 tauri.conf.json），说明页同步展示 */
 void getVersion()
