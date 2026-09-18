@@ -1,11 +1,27 @@
 {
-  "version": "0.2.0",
-  "notes": "v0.2.0：新增文件/文件夹拖放打开功能（拖入 .md / .markdown / .mdx / .txt 文件直接打开，拖入文件夹在侧边栏文件树中展开）；拖放时显示覆盖层动画反馈；多语言支持（中文/英文）；帮助说明新增拖放打开条目；更新检查多端点容错。",
-  "pub_date": "2026-09-18T14:20:32Z",
+  "version": "0.2.1",
+  "notes": "v0.2.1：CI 三平台自动构建（Windows NSIS、Linux AppImage/Deb、macOS DMG）；修复 CI 签名环境变量配置；更新检查多端点容错。",
+  "pub_date": "2026-09-18T04:51:05Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEo0aU9veFZhdXM2cUVGNTJSZzdEZ04wdWJsSzNveGRGZTVpd05lOTdydWs0K1dGWmUwVVczNlV0azM3UGhxd0xIejczd2ZMZWltNTlKTTBkd045N1E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzAzNjMyCWZpbGU6TURWaWV3ZXJfMC4yLjBfeDY0LXNldHVwLmV4ZQp4TmhzQyt3eXhLaVhzU1JWWFlNUktldWhSTFF3OUFiYUJnRFpXK3NNM3NDTE4rbkxrb0k3Nm1mTVY4YkVYTEZ0ZzZwTHZGZS9PRUQrN1F3REJ1c05BUT09Cg==",
-      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.0/MDViewer_0.2.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEU3NmhIMzBzNXQzbGtTekVKdXJnWFFQbGhiNFAvN1lwaXdnaFNOdTJySGRQeGExK21CM2pGY3YrY1ZMVlREOVpHRHlDSDRZLzZiYWlVeTFtN1BqOUFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzA3MDYzCWZpbGU6TURWaWV3ZXJfMC4yLjFfeDY0LXNldHVwLmV4ZQoreDZsbDB4OGtJQTVxTTlRczZobDBuYThlWkdXdWJYVHpORmRobHB4NSs0QmJkb0FlbnFLVUJmdlYyNm45aWFrUHVLN2VUTkRWYzljekJ6cGsrRU5Ddz09Cg==",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.1/MDViewer_0.2.1_x64-setup.exe"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEU3NmhIMzBzNXQzbGtTekVKdXJnWFFQbGhiNFAvN1lwaXdnaFNOdTJySGRQeGExK21CM2pGY3YrY1ZMVlREOVpHRHlDSDRZLzZiYWlVeTFtN1BqOUFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzA3MDYzCWZpbGU6TURWaWV3ZXJfMC4yLjFfeDY0LXNldHVwLmV4ZQoreDZsbDB4OGtJQTVxTTlRczZobDBuYThlWkdXdWJYVHpORmRobHB4NSs0QmJkb0FlbnFLVUJmdlYyNm45aWFrUHVLN2VUTkRWYzljekJ6cGsrRU5Ddz09Cg==",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.1/MDViewer_0.2.1_x64-setup.exe"
+    },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEtyNTBCYXpkNHdpMzY1WjBEV2lHUmJOalc1Nytmb3NjaDNjRVZIeWJvZDNEbVZtSW5kVDNlMHQ3eGRnMlQ5N0hGVWdsbDR1c05Pb3YxSzFRRkpiR1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzA2OTQ0CWZpbGU6TURWaWV3ZXJfMC4yLjFfYW1kNjQuQXBwSW1hZ2UKcllZTWxvNGpjczBCamNQenUwQnlWYjYrbjZMNUhva1RFQytpVkthVDZoMmxJTEc0RmpuQnpCaWhoTSs2bjBKTHZwZi9jdEdkdHRiYWpWVUh3dUU1QlE9PQo=",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.1/MDViewer_0.2.1_amd64.AppImage"
+    },
+    "linux-x86_64-appimage": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEtyNTBCYXpkNHdpMzY1WjBEV2lHUmJOalc1Nytmb3NjaDNjRVZIeWJvZDNEbVZtSW5kVDNlMHQ3eGRnMlQ5N0hGVWdsbDR1c05Pb3YxSzFRRkpiR1FrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzA2OTQ0CWZpbGU6TURWaWV3ZXJfMC4yLjFfYW1kNjQuQXBwSW1hZ2UKcllZTWxvNGpjczBCamNQenUwQnlWYjYrbjZMNUhva1RFQytpVkthVDZoMmxJTEc0RmpuQnpCaWhoTSs2bjBKTHZwZi9jdEdkdHRiYWpWVUh3dUU1QlE9PQo=",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.1/MDViewer_0.2.1_amd64.AppImage"
+    },
+    "linux-x86_64-deb": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEFQN3luYkRjbC9VQ3dkMjhXamIzZkpTZ21oSkJuZy96YXpaRXR4QnRIM1plR0EvSjhGa3ZicHlJRWJUWlJ2ZllTQ3Vick9qQ0dhVWJ5eDhvZlUyMlFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzA2OTQ0CWZpbGU6TURWaWV3ZXJfMC4yLjFfYW1kNjQuZGViCnVweUh2bVJFZHZCd2hGWDV3MjVBbkZFWTZCTG03UHBvNnRQKzJrbFUrK1hNcEYzYjhLcG5JUTY4M05RSERUVTR4SlIxR05TTTcyQ1cwNGZqUlpLM0JnPT0K",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.1/MDViewer_0.2.1_amd64.deb"
     }
   }
 }
