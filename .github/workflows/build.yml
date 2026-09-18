@@ -2,7 +2,7 @@ name: Build & Release
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -50,11 +50,27 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     permissions:
       contents: write
-    name: release (${{ matrix.platform }})
+    name: release (${{ matrix.label }})
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          # macOS Apple Silicon (M1+)
+          - platform: macos-latest
+            label: macOS-arm64
+            args: '--target aarch64-apple-darwin'
+          # macOS Intel
+          - platform: macos-latest
+            label: macOS-x86_64
+            args: '--target x86_64-apple-darwin'
+          # Linux x64
+          - platform: ubuntu-latest
+            label: Linux-x86_64
+            args: ''
+          # Windows x64
+          - platform: windows-latest
+            label: Windows-x86_64
+            args: ''
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -66,6 +82,9 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          # macOS 需要双架构目标
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -84,7 +103,8 @@ jobs:
       - name: Build and upload release assets
         uses: tauri-apps/tauri-action@v0
         env:
-          # 更新包签名私钥（本地 .tauri/mdviewer.key 的内容），见 README“自动更新”
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 更新包签名私钥（本地 .tauri/mdviewer.key 的内容），见 README"自动更新"
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
@@ -93,5 +113,6 @@ jobs:
           releaseBody: '三平台安装包与更新文件（latest.json），支持应用内检查更新。'
           releaseDraft: true
           prerelease: false
+          args: ${{ matrix.args }}
           # 上传 latest.json：客户端检查更新时拉取的清单文件
           includeUpdaterJson: true
