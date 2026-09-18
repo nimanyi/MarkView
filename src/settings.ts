@@ -35,6 +35,7 @@ import { setSyncScrollEnabled } from "./scroll";
 import { formatBarVisible, setFormatBarVisible } from "./toolbar";
 import { currentViewMode, setViewMode, type ViewMode } from "./layout";
 import { baseName, pickOpenPathWith, pickSavePath, readTextFile, writeTextFile } from "./files";
+import { t } from "./i18n";
 
 export interface Settings {
   uiFont: number;
@@ -115,15 +116,15 @@ export function openSettingsDialog(): void {
   openDialog?.();
 }
 
-/** 调色板颜色键 → 设置面板里的中文标签 */
+/** 调色板颜色键 → 设置面板里的标签（i18n 键） */
 const COLOR_FIELDS: { key: keyof PaletteColors; label: string }[] = [
-  { key: "bg", label: "窗口背景" },
-  { key: "bgEditor", label: "编辑区背景" },
-  { key: "fg", label: "文字" },
-  { key: "fgMuted", label: "次要文字" },
-  { key: "border", label: "边框" },
-  { key: "accent", label: "强调色" },
-  { key: "codeBg", label: "代码背景" },
+  { key: "bg", label: "color.bg" },
+  { key: "bgEditor", label: "color.bgEditor" },
+  { key: "fg", label: "color.fg" },
+  { key: "fgMuted", label: "color.fgMuted" },
+  { key: "border", label: "color.border" },
+  { key: "accent", label: "color.accent" },
+  { key: "codeBg", label: "color.codeBg" },
 ];
 
 /** rgba()/任意颜色 → #rrggbb（颜色选择器只认 hex；丢失透明度可接受） */
@@ -248,12 +249,12 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     frag.appendChild(
       makeChip(
         DEFAULT_PALETTE_ID,
-        "默认（跟随主题）",
+        t("settings.paletteDefault"),
         defaultDark ? DEFAULT_DARK_COLORS : DEFAULT_LIGHT_COLORS,
       ),
     );
-    for (const p of BUILTIN_PALETTES) frag.appendChild(makeChip(p.id, p.name, p.colors));
-    for (const p of loadUserPalettes()) frag.appendChild(makeChip(p.id, p.name, p.colors));
+    for (const p of BUILTIN_PALETTES) frag.appendChild(makeChip(p.id, t(p.name), p.colors));
+    for (const p of loadUserPalettes()) frag.appendChild(makeChip(p.id, t(p.name), p.colors));
     paletteList.replaceChildren(frag);
   }
 
@@ -301,7 +302,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
 
   saveBtn.addEventListener("click", () => {
     if (!draft) return;
-    const name = draft.name.trim() || "我的风格";
+    const name = draft.name.trim() || t("palette.defaultName");
     const id = draft.id ?? `user-${Date.now()}`;
     const palette: Palette = { id, name, base: draft.base, colors: { ...draft.colors } };
     const list = loadUserPalettes().filter((p) => p.id !== id);
@@ -311,7 +312,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     editorBox.hidden = true;
     hooks.onPalette(applyPaletteById(id));
     syncUI();
-    hint(`已保存风格「${name}」，可用「导出」分享给他人`);
+    hint(t("palette.saved", { name }));
   });
 
   cancelBtn.addEventListener("click", () => cancelDraft(true));
@@ -323,7 +324,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     editorBox.hidden = true;
     hooks.onPalette(applyPaletteById(DEFAULT_PALETTE_ID));
     syncUI();
-    hint("已删除该风格");
+    hint(t("palette.deleted"));
   });
 
   paletteCustomBtn.addEventListener("click", () => startDraft(null));
@@ -361,7 +362,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     });
     row.appendChild(input);
     const label = document.createElement("span");
-    label.textContent = f.label;
+    label.textContent = t(f.label);
     row.appendChild(label);
     colorsBox.appendChild(row);
   }
@@ -370,14 +371,14 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
 
   paletteImportBtn.addEventListener("click", () => {
     void (async () => {
-      const path = await pickOpenPathWith([{ name: "颜色风格 JSON", extensions: ["json"] }]);
+      const path = await pickOpenPathWith([{ name: t("export.paletteFilter"), extensions: ["json"] }]);
       if (!path) return;
       try {
         const data: unknown = JSON.parse(await readTextFile(path));
         const arr = Array.isArray(data) ? data : [data];
         const valid = arr.map(validatePalette).filter((p): p is Palette => p !== null);
         if (valid.length === 0) {
-          hint("文件里没有有效的颜色风格");
+          hint(t("palette.importEmpty"));
           return;
         }
         const taken = new Set([...BUILTIN_PALETTES, ...loadUserPalettes()].map((p) => p.id));
@@ -392,9 +393,9 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
         }
         saveUserPalettes(list);
         syncUI();
-        hint(`已导入 ${valid.length} 个风格`);
+        hint(t("palette.imported", { count: valid.length }));
       } catch (err) {
-        hint(`导入失败：${String(err)}`);
+        hint(t("palette.importFailed", { err: String(err) }));
       }
     })();
   });
@@ -403,7 +404,7 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
     void (async () => {
       const list = loadUserPalettes();
       if (list.length === 0) {
-        hint("还没有自定义风格，先点「自定义…」做一个吧");
+        hint(t("palette.exportEmpty"));
         return;
       }
       const path = await pickSavePath("mdviewer-styles.json", [
@@ -412,9 +413,9 @@ export function initSettingsDialog(hooks: SettingsHooks): void {
       if (!path) return;
       try {
         await writeTextFile(path, JSON.stringify(list, null, 2));
-        hint(`已导出 ${list.length} 个风格到 ${baseName(path)}`);
+        hint(t("palette.exported", { count: list.length, file: baseName(path) }));
       } catch (err) {
-        hint(`导出失败：${String(err)}`);
+        hint(t("palette.exportFailed", { err: String(err) }));
       }
     })();
   });

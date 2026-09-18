@@ -1431,3 +1431,56 @@ body.dragging-panes {
   background: none;
   cursor: pointer;
 }
+
+/* ---------- 拖放覆盖层（文件拖入窗口时显示） ---------- */
+
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.drop-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 36px 48px;
+  border: 2px dashed var(--accent);
+  border-radius: 16px;
+  background: var(--bg-editor);
+  color: var(--fg);
+  font-size: var(--ui-font-size, 14px);
+  animation: drop-pop 0.2s ease;
+}
+
+@keyframes drop-pop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop-card { animation: none; }
+}
+
+.drop-icon {
+  color: var(--accent);
+}
+
+.drop-text {
+  margin: 0;
+  font-size: 1.14em;
+  font-weight: 600;
+}
+
+.drop-sub {
+  margin: 0;
+  font-size: 0.86em;
+  color: var(--fg-muted);
+}

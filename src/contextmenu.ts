@@ -12,6 +12,7 @@
  */
 
 import type { EditorView } from "@codemirror/view";
+import { t } from "./i18n";
 
 /** 菜单项（导出供标签条等处复用） */
 export interface CtxMenuItem {
@@ -119,7 +120,7 @@ function editorItems(view: EditorView): Entry[] {
   const hasSel = !sel.empty;
   return [
     {
-      label: "剪切",
+      label: t("ctx.cut"),
       disabled: !hasSel,
       run: () => {
         void copyText(view.state.sliceDoc(sel.from, sel.to));
@@ -127,12 +128,12 @@ function editorItems(view: EditorView): Entry[] {
       },
     },
     {
-      label: "复制",
+      label: t("ctx.copy"),
       disabled: !hasSel,
       run: () => void copyText(view.state.sliceDoc(sel.from, sel.to)),
     },
     {
-      label: "粘贴",
+      label: t("ctx.paste"),
       run: () => {
         void readClipboard().then((text) => {
           if (text === null) return;
@@ -143,7 +144,7 @@ function editorItems(view: EditorView): Entry[] {
     },
     "sep",
     {
-      label: "全选",
+      label: t("ctx.selectAll"),
       run: () => {
         view.dispatch({ selection: { anchor: 0, head: view.state.doc.length } });
         view.focus();
@@ -161,7 +162,7 @@ function fieldItems(field: HTMLInputElement): Entry[] {
   };
   return [
     {
-      label: "剪切",
+      label: t("ctx.cut"),
       disabled: !hasSel,
       run: () => {
         void copyText(field.value.slice(start, end));
@@ -170,12 +171,12 @@ function fieldItems(field: HTMLInputElement): Entry[] {
       },
     },
     {
-      label: "复制",
+      label: t("ctx.copy"),
       disabled: !hasSel,
       run: () => void copyText(field.value.slice(start, end)),
     },
     {
-      label: "粘贴",
+      label: t("ctx.paste"),
       run: () => {
         void readClipboard().then((text) => {
           if (text === null) return;
@@ -187,7 +188,7 @@ function fieldItems(field: HTMLInputElement): Entry[] {
     },
     "sep",
     {
-      label: "全选",
+      label: t("ctx.selectAll"),
       run: () => {
         field.focus();
         field.select();
@@ -201,12 +202,12 @@ function plainItems(target: HTMLElement): Entry[] {
   const items: Entry[] = [];
   const selText = window.getSelection()?.toString() ?? "";
   if (selText) {
-    items.push({ label: "复制", run: () => void copyText(selText) });
+    items.push({ label: t("ctx.copy"), run: () => void copyText(selText) });
   }
   const link = target.closest("a");
   if (link && link.href) {
     if (items.length > 0) items.push("sep");
-    items.push({ label: "复制链接地址", run: () => void copyText(link.href) });
+    items.push({ label: t("ctx.copyLink"), run: () => void copyText(link.href) });
   }
   return items;
 }

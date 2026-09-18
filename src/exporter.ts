@@ -1,9 +1,10 @@
 import { invoke } from "@tauri-apps/api/core";
 import { pickSavePath, writeTextFile } from "./files";
 import { enhanceBodyHtml, KATEX_CDN_CSS } from "./enhance";
+import { t, getLocale } from "./i18n";
 
 /** 保存对话框的 HTML 文件类型 */
-const HTML_FILTERS = [{ name: "HTML 页面", extensions: ["html", "htm"] }];
+const HTML_EXTS = ["html", "htm"];
 
 /**
  * 导出文档的内嵌样式：与预览区排版一致（GFM 元素覆盖），
@@ -104,7 +105,7 @@ export async function buildStandaloneHtml(markdown: string, title: string): Prom
   const { html: body, hasMath } = await enhanceBodyHtml(raw);
   return [
     "<!DOCTYPE html>",
-    '<html lang="zh-CN">',
+    `<html lang="${getLocale()}">`,
     "<head>",
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
@@ -129,7 +130,7 @@ export async function exportHtmlFile(
   suggestedName: string,
 ): Promise<boolean> {
   const html = await buildStandaloneHtml(markdown, title);
-  const path = await pickSavePath(suggestedName, HTML_FILTERS);
+  const path = await pickSavePath(suggestedName, [{ name: t("export.htmlFilter"), extensions: HTML_EXTS }]);
   if (!path) return false;
   await writeTextFile(path, html);
   return true;

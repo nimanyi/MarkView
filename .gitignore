@@ -17,3 +17,7 @@ src-tauri/.cargo/config.toml
 Thumbs.db
 *.local
 .idea
+
+# TRAE 临时产物
+.trae-html-share-packages/
+product.html

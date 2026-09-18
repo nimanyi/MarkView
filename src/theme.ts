@@ -15,6 +15,8 @@
 export type ThemeMode = "auto" | "light" | "dark";
 export type PaletteBase = "light" | "dark";
 
+import { t } from "./i18n";
+
 /** 7 个可定制的主题颜色（键名与 CSS 变量一一对应） */
 export interface PaletteColors {
   bg: string; // 窗口背景
@@ -41,11 +43,6 @@ const PALETTES_KEY = "mdviewer.palettes";
 export const DEFAULT_PALETTE_ID = "default";
 
 const MODES: ThemeMode[] = ["auto", "light", "dark"];
-const LABELS: Record<ThemeMode, string> = {
-  auto: "跟随系统",
-  light: "浅色",
-  dark: "深色",
-};
 
 /** 调色板颜色键 → CSS 变量名 */
 const VAR_OF: Record<keyof PaletteColors, string> = {
@@ -84,7 +81,7 @@ export const DEFAULT_DARK_COLORS: PaletteColors = {
 export const BUILTIN_PALETTES: Palette[] = [
   {
     id: "paper",
-    name: "纸墨",
+    name: "theme.paper",
     base: "light",
     colors: {
       bg: "#f6f0e3",
@@ -98,7 +95,7 @@ export const BUILTIN_PALETTES: Palette[] = [
   },
   {
     id: "green",
-    name: "护眼绿",
+    name: "theme.green",
     base: "light",
     colors: {
       bg: "#e4edda",
@@ -112,7 +109,7 @@ export const BUILTIN_PALETTES: Palette[] = [
   },
   {
     id: "ocean",
-    name: "深海蓝",
+    name: "theme.ocean",
     base: "dark",
     colors: {
       bg: "#0f172a",
@@ -126,7 +123,7 @@ export const BUILTIN_PALETTES: Palette[] = [
   },
   {
     id: "violet",
-    name: "暮紫",
+    name: "theme.violet",
     base: "dark",
     colors: {
       bg: "#1b1626",
@@ -159,14 +156,15 @@ export function effectiveDark(): boolean {
 
 /** 模式的显示名 */
 export function themeLabel(mode: ThemeMode): string {
-  return LABELS[mode];
+  return t("theme." + mode);
 }
 
 /** 顶栏主题按钮文案：颜色风格生效时显示风格名，否则显示三态模式名 */
 export function lookLabel(): string {
   const id = currentPaletteId();
   if (id === DEFAULT_PALETTE_ID) return themeLabel(currentMode());
-  return findPalette(id)?.name ?? themeLabel(currentMode());
+  const p = findPalette(id);
+  return p ? t(p.name) : themeLabel(currentMode());
 }
 
 function storedMode(): ThemeMode {
@@ -199,7 +197,7 @@ export function validatePalette(v: unknown): Palette | null {
   }
   return {
     id: o.id.trim(),
-    name: typeof o.name === "string" && o.name.trim() !== "" ? o.name.trim() : "未命名风格",
+    name: typeof o.name === "string" && o.name.trim() !== "" ? o.name.trim() : t("palette.unnamed"),
     base: o.base === "dark" ? "dark" : "light",
     colors,
   };

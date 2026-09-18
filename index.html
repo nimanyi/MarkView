@@ -115,138 +115,149 @@
     <main class="app">
       <header class="app-header" data-tauri-drag-region>
         <span class="app-name" data-tauri-drag-region>MDViewer</span>
-        <span class="file-name" id="file-name" data-tauri-drag-region>未命名.md</span>
+        <span class="file-name" id="file-name" data-tauri-drag-region data-i18n="file.untitledMd">未命名.md</span>
         <span class="toolbar">
-          <button id="btn-new" class="tool-btn" title="新建文档（Ctrl+N）">新建</button>
-          <button id="btn-open" class="tool-btn" title="打开文件（Ctrl+O）">打开</button>
-          <button id="btn-open-dir" class="tool-btn" title="打开文件夹（Ctrl+Shift+O）">打开文件夹</button>
-          <button id="btn-save" class="tool-btn" title="保存（Ctrl+S）">保存</button>
-          <button id="btn-save-as" class="tool-btn" title="另存为（Ctrl+Shift+S）">另存为</button>
-          <button id="btn-export-html" class="tool-btn" title="导出为独立 HTML 文件（Ctrl+Shift+E）">导出 HTML</button>
-          <button id="btn-export-pdf" class="tool-btn" title="打印 / 另存为 PDF（Ctrl+P）">导出 PDF</button>
-          <button id="btn-settings" class="tool-btn" title="设置（Ctrl+,）">设置</button>
-          <button id="btn-help" class="tool-btn" title="使用说明（Ctrl+Shift+H）">说明</button>
-          <button id="btn-theme" class="tool-btn" title="切换主题（Ctrl+Shift+L）">主题：跟随系统</button>
-          <button id="btn-toggle-sidebar" class="tool-btn" title="切换侧边栏（Ctrl+\）">侧栏</button>
+          <button id="btn-new" class="tool-btn" data-i18n="toolbar.new" data-i18n-title="toolbar.new.title">新建</button>
+          <button id="btn-open" class="tool-btn" data-i18n="toolbar.open" data-i18n-title="toolbar.open.title">打开</button>
+          <button id="btn-open-dir" class="tool-btn" data-i18n="toolbar.openDir" data-i18n-title="toolbar.openDir.title">打开文件夹</button>
+          <button id="btn-save" class="tool-btn" data-i18n="toolbar.save" data-i18n-title="toolbar.save.title">保存</button>
+          <button id="btn-save-as" class="tool-btn" data-i18n="toolbar.saveAs" data-i18n-title="toolbar.saveAs.title">另存为</button>
+          <button id="btn-export-html" class="tool-btn" data-i18n="toolbar.exportHtml" data-i18n-title="toolbar.exportHtml.title">导出 HTML</button>
+          <button id="btn-export-pdf" class="tool-btn" data-i18n="toolbar.exportPdf" data-i18n-title="toolbar.exportPdf.title">导出 PDF</button>
+          <button id="btn-settings" class="tool-btn" data-i18n="toolbar.settings" data-i18n-title="toolbar.settings.title">设置</button>
+          <button id="btn-help" class="tool-btn" data-i18n="toolbar.help" data-i18n-title="toolbar.help.title">说明</button>
+          <button id="btn-theme" class="tool-btn" data-i18n-title="toolbar.theme.title">主题：跟随系统</button>
+          <button id="btn-toggle-sidebar" class="tool-btn" data-i18n="toolbar.sidebar" data-i18n-title="toolbar.sidebar.title">侧栏</button>
         </span>
         <span class="app-hint" id="save-hint" data-tauri-drag-region></span>
       </header>
-      <div class="tab-bar" id="tab-bar" role="tablist" aria-label="打开的文档"></div>
+      <div class="tab-bar" id="tab-bar" role="tablist" data-i18n-aria-label="sidebar.ariaTablist"></div>
       <section class="panes">
-        <aside class="sidebar" id="sidebar" aria-label="侧边栏">
+        <aside class="sidebar" id="sidebar" data-i18n-aria-label="sidebar.aria">
           <div class="sidebar-tabs" role="tablist">
-            <button class="tab-btn active" data-tab="files" role="tab">文件</button>
-            <button class="tab-btn" data-tab="outline" role="tab">大纲</button>
-            <button class="tab-btn" data-tab="search" role="tab">搜索</button>
+            <button class="tab-btn active" data-tab="files" role="tab" data-i18n="sidebar.files">文件</button>
+            <button class="tab-btn" data-tab="outline" role="tab" data-i18n="sidebar.outline">大纲</button>
+            <button class="tab-btn" data-tab="search" role="tab" data-i18n="sidebar.search">搜索</button>
           </div>
           <div class="sidebar-pane" data-pane="files">
             <div class="sidebar-header">
-              <span class="sidebar-title" id="sidebar-title">文件</span>
-              <button id="btn-refresh-tree" class="tool-btn" title="刷新文件树">刷新</button>
+              <span class="sidebar-title" id="sidebar-title" data-i18n="sidebar.files">文件</span>
+              <button id="btn-refresh-tree" class="tool-btn" data-i18n="sidebar.refresh" data-i18n-title="sidebar.refresh.title">刷新</button>
             </div>
             <div class="file-tree" id="file-tree"></div>
-            <div class="sidebar-empty" id="sidebar-empty">尚未打开文件夹</div>
+            <div class="sidebar-empty" id="sidebar-empty" data-i18n="sidebar.empty">尚未打开文件夹</div>
           </div>
           <div class="sidebar-pane" data-pane="outline" hidden>
             <div class="outline-list" id="outline-list"></div>
-            <div class="sidebar-empty" id="outline-empty">文档中暂无标题</div>
+            <div class="sidebar-empty" id="outline-empty" data-i18n="sidebar.outlineEmpty">文档中暂无标题</div>
           </div>
           <div class="sidebar-pane" data-pane="search" hidden>
             <div class="search-box">
-              <input id="search-input" type="text" placeholder="在打开的文件夹中搜索…" />
+              <input id="search-input" type="text" data-i18n-placeholder="sidebar.searchPlaceholder" placeholder="在打开的文件夹中搜索…" />
             </div>
             <div class="search-results" id="search-results">
-              <div class="sidebar-empty">按 Ctrl+Shift+F 聚焦搜索</div>
+              <div class="sidebar-empty" data-i18n="sidebar.searchHint">按 Ctrl+Shift+F 聚焦搜索</div>
             </div>
           </div>
         </aside>
-        <div id="editor-host" class="editor-host" aria-label="Markdown 编辑器">
-          <div id="format-bar" class="format-bar" role="toolbar" aria-label="Markdown 排版工具栏"></div>
+        <div id="editor-host" class="editor-host" data-i18n-aria-label="editor.aria">
+          <div id="format-bar" class="format-bar" role="toolbar" data-i18n-aria-label="formatBar.aria"></div>
           <div id="cm-host" class="cm-host"></div>
-          <button id="format-bar-show" class="format-bar-show" type="button" title="显示排版工具栏（Alt+T）" aria-label="显示排版工具栏" hidden>&#9662;</button>
+          <button id="format-bar-show" class="format-bar-show" type="button" data-i18n-title="formatBar.show.title" data-i18n-aria-label="formatBar.show.aria" hidden>&#9662;</button>
         </div>
-        <div id="pane-divider" class="pane-divider" role="separator" aria-orientation="vertical" aria-label="拖动调节编辑区与预览区宽度（双击复位）"></div>
-        <article id="preview" class="preview" aria-label="渲染预览"></article>
-        <section class="welcome-view" id="welcome-view" aria-label="引导页">
+        <div id="pane-divider" class="pane-divider" role="separator" aria-orientation="vertical" data-i18n-aria-label="divider.aria"></div>
+        <article id="preview" class="preview" data-i18n-aria-label="preview.aria"></article>
+        <section class="welcome-view" id="welcome-view" data-i18n-aria-label="welcome.aria">
           <div class="welcome-card">
-            <h1 class="welcome-title">MDViewer</h1>
-            <p class="welcome-sub">Markdown 编辑 · 实时预览 · 导出分享</p>
+            <h1 class="welcome-title" data-i18n="welcome.title">MDViewer</h1>
+            <p class="welcome-sub" data-i18n="welcome.subtitle">Markdown 编辑 · 实时预览 · 导出分享</p>
             <div class="welcome-actions">
               <button id="wc-new" class="welcome-btn primary" type="button">
-                <span class="wc-label">新建文档</span><span class="wc-key">Ctrl+N</span>
+                <span class="wc-label" data-i18n="welcome.new">新建文档</span><span class="wc-key">Ctrl+N</span>
               </button>
               <button id="wc-open" class="welcome-btn" type="button">
-                <span class="wc-label">打开文件</span><span class="wc-key">Ctrl+O</span>
+                <span class="wc-label" data-i18n="welcome.open">打开文件</span><span class="wc-key">Ctrl+O</span>
               </button>
               <button id="wc-dir" class="welcome-btn" type="button">
-                <span class="wc-label">打开文件夹</span><span class="wc-key">Ctrl+Shift+O</span>
+                <span class="wc-label" data-i18n="welcome.openDir">打开文件夹</span><span class="wc-key">Ctrl+Shift+O</span>
               </button>
               <button id="wc-help" class="welcome-btn" type="button">
-                <span class="wc-label">使用说明</span><span class="wc-key">Ctrl+Shift+H</span>
+                <span class="wc-label" data-i18n="welcome.help">使用说明</span><span class="wc-key">Ctrl+Shift+H</span>
               </button>
             </div>
             <ul class="welcome-feats">
-              <li>Rust comrak 解析：GFM 表格、任务列表、删除线、自动链接</li>
-              <li>多标签同时编辑多份文档，右键标签批量关闭</li>
-              <li>KaTeX 数学公式与 Mermaid 图表实时渲染</li>
-              <li>一键导出自包含 HTML，或打印为 PDF</li>
-              <li>文件树、大纲导航、全文搜索、自动保存</li>
+              <li data-i18n="welcome.feat1">Rust comrak 解析：GFM 表格、任务列表、删除线、自动链接</li>
+              <li data-i18n="welcome.feat2">多标签同时编辑多份文档，右键标签批量关闭</li>
+              <li data-i18n="welcome.feat3">KaTeX 数学公式与 Mermaid 图表实时渲染</li>
+              <li data-i18n="welcome.feat4">一键导出自包含 HTML，或打印为 PDF</li>
+              <li data-i18n="welcome.feat5">文件树、大纲导航、全文搜索、自动保存</li>
             </ul>
           </div>
         </section>
       </section>
       <footer class="app-footer">
-        <span id="stat-pos">行 1，列 1</span>
-        <span id="stat-count">0 字符</span>
+        <span id="stat-pos" data-i18n="stat.pos">行 1，列 1</span>
+        <span id="stat-count" data-i18n="stat.count">0 字符</span>
         <span class="spacer"></span>
-        <button id="btn-update" class="tool-btn footer-btn" title="检查更新（Ctrl+Shift+U）">检查更新</button>
+        <button id="btn-update" class="tool-btn footer-btn" data-i18n="stat.checkUpdate" data-i18n-title="stat.checkUpdate.title">检查更新</button>
         <span class="footer-brand" id="app-version" title="应用版本"></span>
-        <span class="footer-brand">comrak · GFM</span>
+        <span class="footer-brand" data-i18n="stat.comrakGfm">comrak · GFM</span>
       </footer>
+      <div id="drop-overlay" class="drop-overlay" hidden>
+        <div class="drop-card">
+          <svg class="drop-icon" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p class="drop-text" data-i18n="drop.hint">拖放文件以打开</p>
+          <p class="drop-sub" data-i18n="drop.formats">支持 .md .markdown .mdx .txt</p>
+        </div>
+      </div>
     </main>
     <dialog id="settings-dialog" class="panel-dialog" aria-labelledby="settings-title">
-      <h2 id="settings-title" class="dialog-heading">设置</h2>
-      <div class="set-tabs" role="tablist" aria-label="设置分组">
-        <button type="button" class="set-tab" data-tab="look" role="tab">外观</button>
-        <button type="button" class="set-tab" data-tab="font" role="tab">字号</button>
-        <button type="button" class="set-tab" data-tab="edit" role="tab">编辑</button>
+      <h2 id="settings-title" class="dialog-heading" data-i18n="settings.title">设置</h2>
+      <div class="set-tabs" role="tablist" data-i18n-aria-label="settings.ariaTabs">
+        <button type="button" class="set-tab" data-tab="look" role="tab" data-i18n="settings.tab.look">外观</button>
+        <button type="button" class="set-tab" data-tab="font" role="tab" data-i18n="settings.tab.font">字号</button>
+        <button type="button" class="set-tab" data-tab="edit" role="tab" data-i18n="settings.tab.edit">编辑</button>
       </div>
       <div class="panel-body">
         <!-- 外观：主题三态 + 颜色风格（自定义 / 导入 / 导出） -->
         <section class="set-page" data-page="look">
           <div class="set-row">
-            <span class="set-label">主题</span>
-            <div id="theme-seg" class="seg" role="radiogroup" aria-label="主题">
-              <button type="button" class="seg-btn" data-mode="auto">跟随系统</button>
-              <button type="button" class="seg-btn" data-mode="light">浅色</button>
-              <button type="button" class="seg-btn" data-mode="dark">深色</button>
+            <span class="set-label" data-i18n="settings.theme">主题</span>
+            <div id="theme-seg" class="seg" role="radiogroup" data-i18n-aria-label="settings.themeAria">
+              <button type="button" class="seg-btn" data-mode="auto" data-i18n="settings.theme.auto">跟随系统</button>
+              <button type="button" class="seg-btn" data-mode="light" data-i18n="settings.theme.light">浅色</button>
+              <button type="button" class="seg-btn" data-mode="dark" data-i18n="settings.theme.dark">深色</button>
             </div>
           </div>
           <div class="set-row set-row-top">
-            <span class="set-label">颜色风格</span>
+            <span class="set-label" data-i18n="settings.palette">颜色风格</span>
             <div class="palette-wrap">
               <div id="palette-list" class="palette-list"></div>
               <div class="palette-actions">
-                <button type="button" id="palette-custom" class="tool-btn">自定义…</button>
-                <button type="button" id="palette-edit" class="tool-btn" hidden>编辑当前</button>
-                <button type="button" id="palette-import" class="tool-btn" title="从 JSON 文件导入风格">导入…</button>
-                <button type="button" id="palette-export" class="tool-btn" title="导出自定义风格为 JSON（可分享 / 上架风格市场）">导出</button>
+                <button type="button" id="palette-custom" class="tool-btn" data-i18n="settings.paletteCustom">自定义…</button>
+                <button type="button" id="palette-edit" class="tool-btn" hidden data-i18n="settings.paletteEdit">编辑当前</button>
+                <button type="button" id="palette-import" class="tool-btn" data-i18n="settings.paletteImport" data-i18n-title="settings.paletteImport.title">导入…</button>
+                <button type="button" id="palette-export" class="tool-btn" data-i18n="settings.paletteExport" data-i18n-title="settings.paletteExport.title">导出</button>
               </div>
               <p class="palette-hint" id="palette-hint"></p>
               <div id="palette-editor" class="palette-editor" hidden>
                 <div class="set-row">
-                  <label class="set-label" for="palette-name">名称</label>
-                  <input id="palette-name" type="text" maxlength="16" placeholder="我的风格" />
-                  <div id="palette-base-seg" class="seg" role="radiogroup" aria-label="底色">
-                    <button type="button" class="seg-btn" data-base="light">浅色底</button>
-                    <button type="button" class="seg-btn" data-base="dark">深色底</button>
+                  <label class="set-label" for="palette-name" data-i18n="settings.palette.name">名称</label>
+                  <input id="palette-name" type="text" maxlength="16" data-i18n-placeholder="settings.paletteNamePlaceholder" placeholder="我的风格" />
+                  <div id="palette-base-seg" class="seg" role="radiogroup" data-i18n-aria-label="settings.palette.baseAria">
+                    <button type="button" class="seg-btn" data-base="light" data-i18n="settings.palette.baseLight">浅色底</button>
+                    <button type="button" class="seg-btn" data-base="dark" data-i18n="settings.palette.baseDark">深色底</button>
                   </div>
                 </div>
                 <div id="palette-colors" class="palette-colors"></div>
                 <div class="palette-actions">
-                  <button type="button" id="palette-save" class="tool-btn primary">保存风格</button>
-                  <button type="button" id="palette-cancel" class="tool-btn">取消</button>
-                  <button type="button" id="palette-delete" class="tool-btn" hidden>删除此风格</button>
+                  <button type="button" id="palette-save" class="tool-btn primary" data-i18n="settings.palette.save">保存风格</button>
+                  <button type="button" id="palette-cancel" class="tool-btn" data-i18n="settings.palette.cancel">取消</button>
+                  <button type="button" id="palette-delete" class="tool-btn" hidden data-i18n="settings.palette.delete">删除此风格</button>
                 </div>
               </div>
             </div>
@@ -255,17 +266,17 @@
         <!-- 字号：界面 / 编辑器 / 预览三个滑杆 -->
         <section class="set-page" data-page="font" hidden>
           <div class="set-row">
-            <label class="set-label" for="set-ui-font">界面字号</label>
+            <label class="set-label" for="set-ui-font" data-i18n="settings.uiFont">界面字号</label>
             <input id="set-ui-font" type="range" min="12" max="18" step="1" />
             <span class="set-value" id="ui-font-value"></span>
           </div>
           <div class="set-row">
-            <label class="set-label" for="set-editor-font">编辑器字号</label>
+            <label class="set-label" for="set-editor-font" data-i18n="settings.editorFont">编辑器字号</label>
             <input id="set-editor-font" type="range" min="12" max="20" step="1" />
             <span class="set-value" id="editor-font-value"></span>
           </div>
           <div class="set-row">
-            <label class="set-label" for="set-preview-font">预览字号</label>
+            <label class="set-label" for="set-preview-font" data-i18n="settings.previewFont">预览字号</label>
             <input id="set-preview-font" type="range" min="12" max="20" step="1" />
             <span class="set-value" id="preview-font-value"></span>
           </div>
@@ -273,118 +284,134 @@
         <!-- 编辑：视图模式与编辑行为开关 -->
         <section class="set-page" data-page="edit" hidden>
           <div class="set-row">
-            <span class="set-label">视图</span>
-            <div id="view-seg" class="seg" role="radiogroup" aria-label="视图模式">
-              <button type="button" class="seg-btn" data-mode="split">双栏</button>
-              <button type="button" class="seg-btn" data-mode="editor">仅编辑</button>
-              <button type="button" class="seg-btn" data-mode="preview">仅预览</button>
+            <span class="set-label" data-i18n="settings.view">视图</span>
+            <div id="view-seg" class="seg" role="radiogroup" data-i18n-aria-label="settings.viewAria">
+              <button type="button" class="seg-btn" data-mode="split" data-i18n="settings.view.split">双栏</button>
+              <button type="button" class="seg-btn" data-mode="editor" data-i18n="settings.view.editor">仅编辑</button>
+              <button type="button" class="seg-btn" data-mode="preview" data-i18n="settings.view.preview">仅预览</button>
             </div>
           </div>
           <label class="set-row set-check">
             <input id="set-sync-scroll" type="checkbox" />
-            <span>编辑区与预览区同步滚动</span>
+            <span data-i18n="settings.syncScroll">编辑区与预览区同步滚动</span>
           </label>
           <label class="set-row set-check">
             <input id="set-format-bar" type="checkbox" />
-            <span>显示排版工具栏（Alt+T）</span>
+            <span data-i18n="settings.formatBar">显示排版工具栏（Alt+T）</span>
           </label>
           <label class="set-row set-check">
             <input id="set-autosave" type="checkbox" />
-            <span>自动保存（停止输入 2 秒后写回原文件）</span>
+            <span data-i18n="settings.autoSave">自动保存（停止输入 2 秒后写回原文件）</span>
           </label>
-        </section>
-      </div>
-      <div class="dialog-actions">
-        <button value="close" class="tool-btn">关闭</button>
-      </div>
-    </dialog>
-
-    <dialog id="help-dialog" class="panel-dialog" aria-labelledby="help-title">
-      <h2 id="help-title" class="dialog-heading">MDViewer 使用说明</h2>
-      <div class="panel-body help-body">
-        <section>
-          <h3>简介</h3>
-          <p>MDViewer 是一款跨平台 Markdown 编辑 / 预览应用：左侧编辑、右侧实时预览，
-          解析由 Rust 端 comrak 完成（完整 GFM 支持），内建 KaTeX 数学公式与 Mermaid 图表渲染，
-          支持导出独立 HTML 与 PDF、文件树管理、大纲导航、全文搜索和自动更新。</p>
-        </section>
-        <section>
-          <h3>界面</h3>
-          <ul>
-            <li>侧边栏（Ctrl+\）：文件树 / 文档大纲 / 全文搜索三个标签页</li>
-            <li>视图模式（Ctrl+Shift+V）：双栏 / 仅编辑 / 仅预览，设置面板中同样可选</li>
-            <li>右键菜单：按位置提供剪切 / 复制 / 粘贴、复制链接等（浏览器默认菜单已屏蔽）</li>
-            <li>编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
-            <li>中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
-            <li>设置（Ctrl+,）：主题三态、颜色风格（内置 / 自定义 7 色调色板，实时预览；可导入 / 导出 JSON 与人分享——风格市场的分发格式）、界面 / 编辑器 / 预览字号</li>
-            <li>自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
-            <li>多标签：可同时打开多份文档，点击标签或 Ctrl+Tab 切换，Ctrl+W / 中键关闭；右键标签可批量关闭左侧 / 右侧 / 其他 / 所有；标签圆点亮起表示有未保存修改，打开新文件不会打断当前编辑</li>
-            <li>引导页：启动或关闭全部标签时显示，提供新建 / 打开文件 / 打开文件夹 / 使用说明的快捷入口</li>
-          </ul>
-        </section>
-        <section>
-          <h3>全局快捷键</h3>
-          <table>
-            <tbody>
-              <tr><td>Ctrl+N</td><td>新建文档</td></tr>
-              <tr><td>Ctrl+O / Ctrl+Shift+O</td><td>打开文件 / 打开文件夹</td></tr>
-              <tr><td>Ctrl+S / Ctrl+Shift+S</td><td>保存 / 另存为</td></tr>
-              <tr><td>Ctrl+W</td><td>关闭标签页</td></tr>
-              <tr><td>Ctrl+Tab / Ctrl+Shift+Tab</td><td>下一个 / 上一个标签</td></tr>
-              <tr><td>Ctrl+Shift+E / Ctrl+P</td><td>导出 HTML / 打印・PDF</td></tr>
-              <tr><td>Ctrl+\</td><td>切换侧边栏</td></tr>
-              <tr><td>Ctrl+Shift+V</td><td>切换视图（双栏 / 仅编辑 / 仅预览）</td></tr>
-              <tr><td>Ctrl+Shift+D</td><td>隐藏 / 显示预览（仅编辑 ↔ 双栏）</td></tr>
-              <tr><td>Alt+T</td><td>显示 / 隐藏排版工具栏</td></tr>
-              <tr><td>Ctrl+Shift+L</td><td>循环切换主题</td></tr>
-              <tr><td>Ctrl+Shift+F</td><td>全文搜索</td></tr>
-              <tr><td>Ctrl+, / Ctrl+Shift+H</td><td>设置 / 本说明</td></tr>
-              <tr><td>Ctrl+Shift+U</td><td>检查更新</td></tr>
-            </tbody>
-          </table>
-        </section>
-        <section>
-          <h3>编辑器排版快捷键（光标在编辑器内）</h3>
-          <table>
-            <tbody>
-              <tr><td>Ctrl+B / Ctrl+I</td><td>加粗 / 斜体</td></tr>
-              <tr><td>Ctrl+E / Ctrl+Shift+X</td><td>行内代码 / 删除线</td></tr>
-              <tr><td>Ctrl+K</td><td>插入链接（选区作链接文字）</td></tr>
-              <tr><td>Ctrl+1 ~ Ctrl+6</td><td>设为 H1~H6 标题（同键再按取消）</td></tr>
-            </tbody>
-          </table>
-          <p class="dialog-hint">以上均为 toggle 语义：已包裹再按一次即取消；工具栏按钮与快捷键行为一致。</p>
-        </section>
-        <section>
-          <h3>关于</h3>
-          <p>版本 <span id="help-version"></span> · Tauri 2 + CodeMirror 6 + comrak ·
-          偏好（主题、字号、分栏比例等）保存在本机，可在设置中调整；
-          应用更新可从状态栏“检查更新”手动触发。</p>
-          <div class="about-copyright">
-            <p class="about-line">项目主页：
-              <button type="button" class="about-link" id="about-repo" title="在浏览器中打开">github.com/nimanyi/MarkView</button>
-              <button type="button" class="about-copy" id="about-repo-copy" title="复制仓库地址">复制</button>
-            </p>
-            <p class="about-line">© 2026 MDViewer · 保留所有权利</p>
-            <p class="about-line">本软件以 MIT 许可发布，并在下列开源组件之上构建：</p>
-            <p class="about-oss">Tauri 2（MIT / Apache-2.0）· CodeMirror 6（MIT）· comrak（BSD-2-Clause）· KaTeX（MIT）· Mermaid（MIT）</p>
-            <p class="about-oss">感谢以上开源社区的贡献者。</p>
+          <div class="set-row">
+            <span class="set-label" data-i18n="settings.language">语言</span>
+            <select id="set-language" class="lang-select"></select>
           </div>
         </section>
       </div>
       <div class="dialog-actions">
-        <button value="close" class="tool-btn">关闭</button>
+        <button value="close" class="tool-btn" data-i18n="settings.close">关闭</button>
+      </div>
+    </dialog>
+
+    <dialog id="help-dialog" class="panel-dialog" aria-labelledby="help-title">
+      <h2 id="help-title" class="dialog-heading" data-i18n="help.title">MDViewer 使用说明</h2>
+      <div class="panel-body help-body">
+        <section>
+          <h3 data-i18n="help.intro">简介</h3>
+          <p data-i18n="help.intro.p1">MDViewer 是一款跨平台 Markdown 编辑 / 预览应用：左侧编辑、右侧实时预览，解析由 Rust 端 comrak 完成（完整 GFM 支持），内建 KaTeX 数学公式与 Mermaid 图表渲染，支持导出独立 HTML 与 PDF、文件树管理、大纲导航、全文搜索和自动更新。</p>
+        </section>
+        <section>
+          <h3 data-i18n="help.ui">界面</h3>
+          <ul>
+            <li data-i18n="help.ui.sidebar">侧边栏（Ctrl+\）：文件树 / 文档大纲 / 全文搜索三个标签页</li>
+            <li data-i18n="help.ui.view">视图模式（Ctrl+Shift+V）：双栏 / 仅编辑 / 仅预览，设置面板中同样可选</li>
+            <li data-i18n="help.ui.context">右键菜单：按位置提供剪切 / 复制 / 粘贴、复制链接等（浏览器默认菜单已屏蔽）</li>
+            <li data-i18n="help.ui.editor">编辑区：顶部排版工具栏随光标高亮当前格式，可用 Alt+T 收起</li>
+            <li data-i18n="help.ui.divider">中缝分隔条：拖动调节编辑 / 预览宽度，双击复位</li>
+            <li data-i18n="help.ui.settings">设置（Ctrl+,）：主题三态、颜色风格（内置 / 自定义 7 色调色板，实时预览；可导入 / 导出 JSON 与人分享——风格市场的分发格式）、界面 / 编辑器 / 预览字号</li>
+            <li data-i18n="help.ui.autosave">自动保存：打开的文件停止输入 2 秒后自动写回（设置中可关闭）</li>
+            <li data-i18n="help.ui.tabs">多标签：可同时打开多份文档，点击标签或 Ctrl+Tab 切换，Ctrl+W / 中键关闭；右键标签可批量关闭左侧 / 右侧 / 其他 / 所有；标签圆点亮起表示有未保存修改，打开新文件不会打断当前编辑</li>
+            <li data-i18n="help.ui.welcome">引导页：启动或关闭全部标签时显示，提供新建 / 打开文件 / 打开文件夹 / 使用说明的快捷入口</li>
+            <li data-i18n="help.ui.dragDrop">拖放打开：将 .md / .markdown / .mdx / .txt 文件直接拖入窗口即可打开</li>
+          </ul>
+        </section>
+        <section>
+          <h3 data-i18n="help.shortcuts">全局快捷键</h3>
+          <table>
+            <tbody>
+              <tr><td>Ctrl+N</td><td data-i18n="help.sc.new">新建文档</td></tr>
+              <tr><td>Ctrl+O / Ctrl+Shift+O</td><td data-i18n="help.sc.open">打开文件 / 打开文件夹</td></tr>
+              <tr><td>Ctrl+S / Ctrl+Shift+S</td><td data-i18n="help.sc.save">保存 / 另存为</td></tr>
+              <tr><td>Ctrl+W</td><td data-i18n="help.sc.close">关闭标签页</td></tr>
+              <tr><td>Ctrl+Tab / Ctrl+Shift+Tab</td><td data-i18n="help.sc.tab">下一个 / 上一个标签</td></tr>
+              <tr><td>Ctrl+Shift+E / Ctrl+P</td><td data-i18n="help.sc.export">导出 HTML / 打印・PDF</td></tr>
+              <tr><td>Ctrl+\</td><td data-i18n="help.sc.sidebar">切换侧边栏</td></tr>
+              <tr><td>Ctrl+Shift+V</td><td data-i18n="help.sc.view">切换视图（双栏 / 仅编辑 / 仅预览）</td></tr>
+              <tr><td>Ctrl+Shift+D</td><td data-i18n="help.sc.preview">隐藏 / 显示预览（仅编辑 ↔ 双栏）</td></tr>
+              <tr><td>Alt+T</td><td data-i18n="help.sc.formatBar">显示 / 隐藏排版工具栏</td></tr>
+              <tr><td>Ctrl+Shift+L</td><td data-i18n="help.sc.theme">循环切换主题</td></tr>
+              <tr><td>Ctrl+Shift+F</td><td data-i18n="help.sc.search">全文搜索</td></tr>
+              <tr><td>Ctrl+, / Ctrl+Shift+H</td><td data-i18n="help.sc.settings">设置 / 本说明</td></tr>
+              <tr><td>Ctrl+Shift+U</td><td data-i18n="help.sc.update">检查更新</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section>
+          <h3 data-i18n="help.editorShortcuts">编辑器排版快捷键（光标在编辑器内）</h3>
+          <table>
+            <tbody>
+              <tr><td>Ctrl+B / Ctrl+I</td><td data-i18n="help.es.bold">加粗 / 斜体</td></tr>
+              <tr><td>Ctrl+E / Ctrl+Shift+X</td><td data-i18n="help.es.code">行内代码 / 删除线</td></tr>
+              <tr><td>Ctrl+K</td><td data-i18n="help.es.link">插入链接（选区作链接文字）</td></tr>
+              <tr><td>Ctrl+1 ~ Ctrl+6</td><td data-i18n="help.es.heading">设为 H1~H6 标题（同键再按取消）</td></tr>
+            </tbody>
+          </table>
+          <p class="dialog-hint" data-i18n="help.hint">以上均为 toggle 语义：已包裹再按一次即取消；工具栏按钮与快捷键行为一致。</p>
+        </section>
+        <section>
+          <h3 data-i18n="help.about">关于</h3>
+          <p><span data-i18n="help.about.versionLabel">版本 </span><span id="help-version"></span><span data-i18n="help.about.versionRest"> · Tauri 2 + CodeMirror 6 + comrak · 偏好（主题、字号、分栏比例等）保存在本机，可在设置中调整；应用更新可从状态栏"检查更新"手动触发。</span></p>
+          <div class="about-copyright">
+            <p class="about-line"><span data-i18n="help.about.repo">项目主页：</span>
+              <button type="button" class="about-link" id="about-repo" data-i18n-title="about.repoTitle">github.com/nimanyi/MarkView</button>
+              <button type="button" class="about-copy" id="about-repo-copy" data-i18n="about.repoCopy" data-i18n-title="about.repoCopyTitle">复制</button>
+            </p>
+            <p class="about-line" data-i18n="help.about.copyright">© 2026 MDViewer · 保留所有权利</p>
+            <p class="about-line" data-i18n="help.about.license">本软件以 MIT 许可发布，并在下列开源组件之上构建：</p>
+            <p class="about-oss">Tauri 2（MIT / Apache-2.0）· CodeMirror 6（MIT）· comrak（BSD-2-Clause）· KaTeX（MIT）· Mermaid（MIT）</p>
+            <p class="about-oss" data-i18n="help.about.thanks">感谢以上开源社区的贡献者。</p>
+          </div>
+        </section>
+      </div>
+      <div class="dialog-actions">
+        <button value="close" class="tool-btn" data-i18n="settings.close">关闭</button>
       </div>
     </dialog>
 
     <dialog id="unsaved-dialog" class="unsaved-dialog">
-      <p class="dialog-text" id="unsaved-text">是否保存更改？</p>
+      <p class="dialog-text" id="unsaved-text" data-i18n="unsaved.title">是否保存更改？</p>
       <div class="dialog-actions">
-        <button value="save" class="tool-btn primary">保存</button>
-        <button value="discard" class="tool-btn">不保存</button>
-        <button value="cancel" class="tool-btn">取消</button>
+        <button value="save" class="tool-btn primary" data-i18n="unsaved.save">保存</button>
+        <button value="discard" class="tool-btn" data-i18n="unsaved.discard">不保存</button>
+        <button value="cancel" class="tool-btn" data-i18n="unsaved.cancel">取消</button>
       </div>
     </dialog>
+    <script>
+      /* 启动占位文本：按已保存 locale 提前替换，避免模块加载前闪现错误语言 */
+      (function () {
+        var locale = localStorage.getItem("mdviewer.locale") || "";
+        var texts = {
+          "zh-CN": { loading: "正在启动…", aria: "正在启动 MDViewer" },
+          en: { loading: "Starting…", aria: "Starting MDViewer" },
+        };
+        var t = texts[locale] || texts["zh-CN"];
+        var boot = document.getElementById("boot");
+        if (boot) boot.setAttribute("aria-label", t.aria);
+        var bt = boot && boot.querySelector(".boot-text");
+        if (bt) bt.textContent = t.loading;
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

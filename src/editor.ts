@@ -7,6 +7,7 @@ import { languages } from "@codemirror/language-data";
 import { oneDark } from "@codemirror/theme-one-dark";
 
 import { formatKeymap } from "./format";
+import { t } from "./i18n";
 
 export type { EditorView } from "@codemirror/view";
 
@@ -98,5 +99,5 @@ export function getDocText(view: EditorView): string {
 export function cursorLabel(view: EditorView): string {
   const head = view.state.selection.main.head;
   const line = view.state.doc.lineAt(head);
-  return `行 ${line.number}，列 ${head - line.from + 1}`;
+  return t("editor.cursorLabel", { line: line.number, col: head - line.from + 1 });
 }

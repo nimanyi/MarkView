@@ -10,13 +10,14 @@
  */
 
 import { reapplyRatio } from "./splitter";
+import { t } from "./i18n";
 
 export type ViewMode = "split" | "editor" | "preview";
 
 const STORAGE_KEY = "mdviewer.view-mode";
 
 export function viewModeLabel(mode: ViewMode): string {
-  return mode === "split" ? "双栏" : mode === "editor" ? "仅编辑" : "仅预览";
+  return mode === "split" ? t("view.split") : mode === "editor" ? t("view.editor") : t("view.preview");
 }
 
 let panes: HTMLElement | null = null;

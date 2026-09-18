@@ -20,6 +20,8 @@ export interface SidebarCallbacks {
 export interface Sidebar {
   /** 弹出对话框选择根目录并渲染 */
   openFolder(): Promise<void>;
+  /** 直接打开指定路径的文件夹（拖放目录时使用，无需对话框） */
+  openFolderAt(path: string): Promise<void>;
   /** 重新加载（保留展开状态），目录内容变化后调用 */
   refresh(): Promise<void>;
   /** 更新当前文件高亮（文件未在树中时仅清除高亮） */
@@ -120,8 +122,16 @@ export function createSidebar(
     await render();
   }
 
+  /** 直接设置根目录并渲染（拖放目录时使用） */
+  async function openFolderAt(path: string): Promise<void> {
+    rootPath = path;
+    expanded.clear();
+    await render();
+  }
+
   return {
     openFolder,
+    openFolderAt,
     refresh: render,
     setCurrentPath(path) {
       currentPath = path;

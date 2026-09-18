@@ -16,6 +16,7 @@
 
 import { EditorSelection, Prec } from "@codemirror/state";
 import { EditorView, keymap, type Command } from "@codemirror/view";
+import { t } from "./i18n";
 
 /* ---------- 行内标记 ---------- */
 
@@ -216,7 +217,7 @@ export const cmdTable: Command = (view: EditorView): boolean => {
   const line = view.state.doc.lineAt(sel.from);
   const lead = line.text.trim() === "" ? "" : "\n\n"; // 行内已有内容则先断行
   const trail = sel.to >= line.to ? "" : "\n"; // 光标在行中时补换行，避免同行粘连
-  const table = "| 标题 | 标题 | 标题 |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |";
+  const table = t("fmt.tableTemplate");
   view.dispatch({ changes: { from: sel.from, to: sel.to, insert: lead + table + trail } });
   return true;
 };

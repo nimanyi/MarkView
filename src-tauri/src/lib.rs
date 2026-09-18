@@ -12,7 +12,7 @@ struct DirEntryInfo {
 /// 跳过隐藏条目（点开头）；目录在前、同级按名称不区分大小写排序。
 #[tauri::command]
 fn list_dir(path: String) -> Result<Vec<DirEntryInfo>, String> {
-    let rd = std::fs::read_dir(&path).map_err(|e| format!("读取目录失败：{e}"))?;
+    let rd = std::fs::read_dir(&path).map_err(|e| format!("Failed to read directory: {e}"))?;
     let mut entries: Vec<DirEntryInfo> = Vec::new();
     for item in rd.flatten() {
         let name = item.file_name().to_string_lossy().into_owned();
@@ -54,13 +54,19 @@ fn parse_markdown(source: String) -> String {
 /// 路径来自系统文件对话框，由用户主动选择，不额外做目录限制。
 #[tauri::command]
 fn read_file(path: String) -> Result<String, String> {
-    std::fs::read_to_string(&path).map_err(|e| format!("读取失败：{e}"))
+    std::fs::read_to_string(&path).map_err(|e| format!("Failed to read: {e}"))
 }
 
 /// 将文本写入文件（覆盖写入；保存路径来自系统保存对话框）。
 #[tauri::command]
 fn write_file(path: String, contents: String) -> Result<(), String> {
-    std::fs::write(&path, contents).map_err(|e| format!("写入失败：{e}"))
+    std::fs::write(&path, contents).map_err(|e| format!("Failed to write: {e}"))
+}
+
+/// 判断路径是否为目录（拖放时区分文件与文件夹）。
+#[tauri::command]
+fn is_dir(path: String) -> bool {
+    std::path::Path::new(&path).is_dir()
 }
 
 /// 跨文件搜索命中：文件路径 / 行号（1 起）/ 该行内容（去除首尾空白）。
@@ -155,6 +161,7 @@ pub fn run() {
             read_file,
             write_file,
             list_dir,
+            is_dir,
             search_in_dir
         ])
         .run(tauri::generate_context!())

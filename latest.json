@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "v0.2.0：新增文件/文件夹拖放打开功能（拖入 .md / .markdown / .mdx / .txt 文件直接打开，拖入文件夹在侧边栏文件树中展开）；拖放时显示覆盖层动画反馈；多语言支持（中文/英文）；帮助说明新增拖放打开条目；更新检查多端点容错。",
+  "pub_date": "2026-09-18T14:20:32Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSRU9VMm1BUlB5NEo0aU9veFZhdXM2cUVGNTJSZzdEZ04wdWJsSzNveGRGZTVpd05lOTdydWs0K1dGWmUwVVczNlV0azM3UGhxd0xIejczd2ZMZWltNTlKTTBkd045N1E4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg5NzAzNjMyCWZpbGU6TURWaWV3ZXJfMC4yLjBfeDY0LXNldHVwLmV4ZQp4TmhzQyt3eXhLaVhzU1JWWFlNUktldWhSTFF3OUFiYUJnRFpXK3NNM3NDTE4rbkxrb0k3Nm1mTVY4YkVYTEZ0ZzZwTHZGZS9PRUQrN1F3REJ1c05BUT09Cg==",
+      "url": "https://github.com/nimanyi/MarkView/releases/download/v0.2.0/MDViewer_0.2.0_x64-setup.exe"
+    }
+  }
+}

@@ -9,6 +9,7 @@
  */
 import katex from "katex";
 import { effectiveDark } from "./theme";
+import { t } from "./i18n";
 
 /** 渲染计数：Mermaid SVG 节点 id 唯一化 */
 let seq = 0;
@@ -58,7 +59,7 @@ async function enhanceMermaid(root: ParentNode): Promise<boolean> {
     } catch (err) {
       const fallback = document.createElement("pre");
       fallback.className = "mermaid-error";
-      fallback.textContent = `图表渲染失败：${err}\n\n${source}`;
+      fallback.textContent = t("mermaid.error", { err: String(err) }) + "\n\n" + source;
       const pre = block.closest("pre");
       if (pre) pre.replaceWith(fallback);
       else block.replaceWith(fallback);

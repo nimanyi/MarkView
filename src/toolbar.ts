@@ -26,6 +26,7 @@ import {
   headingLevelAt,
   inBlock,
 } from "./format";
+import { t } from "./i18n";
 
 const STORAGE_KEY = "mdviewer.format-bar";
 
@@ -85,22 +86,22 @@ interface Def {
 type Item = Def | "sep" | "spacer";
 
 const DEFS: Item[] = [
-  { title: "加粗（Ctrl+B）", html: G.bold, run: cmdBold, active: (v) => hasWrap(v, "**") },
-  { title: "斜体（Ctrl+I）", html: G.italic, run: cmdItalic, active: (v) => hasWrap(v, "*") },
-  { title: "删除线（Ctrl+Shift+X）", html: G.strike, run: cmdStrike, active: (v) => hasWrap(v, "~~") },
-  { title: "行内代码（Ctrl+E）", html: G.code, run: cmdCode, active: (v) => hasWrap(v, "`") },
+  { title: "fmt.bold.title", html: G.bold, run: cmdBold, active: (v) => hasWrap(v, "**") },
+  { title: "fmt.italic.title", html: G.italic, run: cmdItalic, active: (v) => hasWrap(v, "*") },
+  { title: "fmt.strike.title", html: G.strike, run: cmdStrike, active: (v) => hasWrap(v, "~~") },
+  { title: "fmt.code.title", html: G.code, run: cmdCode, active: (v) => hasWrap(v, "`") },
   "sep",
-  { title: "链接（Ctrl+K）", html: ICONS.link, run: cmdLink },
-  { title: "引用块", html: G.quote, run: cmdQuote, active: (v) => inBlock(v, "quote") },
-  { title: "无序列表", html: ICONS.ul, run: cmdUl, active: (v) => inBlock(v, "ul") },
-  { title: "有序列表", html: ICONS.ol, run: cmdOl, active: (v) => inBlock(v, "ol") },
+  { title: "fmt.link.title", html: ICONS.link, run: cmdLink },
+  { title: "fmt.quote.title", html: G.quote, run: cmdQuote, active: (v) => inBlock(v, "quote") },
+  { title: "fmt.ul.title", html: ICONS.ul, run: cmdUl, active: (v) => inBlock(v, "ul") },
+  { title: "fmt.ol.title", html: ICONS.ol, run: cmdOl, active: (v) => inBlock(v, "ol") },
   "sep",
-  { title: "标题 H1（Ctrl+1）", html: G.h1, run: cmdH1, active: (v) => headingLevelAt(v) === 1 },
-  { title: "标题 H2（Ctrl+2）", html: G.h2, run: cmdH2, active: (v) => headingLevelAt(v) === 2 },
-  { title: "标题 H3（Ctrl+3）", html: G.h3, run: cmdH3, active: (v) => headingLevelAt(v) === 3 },
+  { title: "fmt.h1.title", html: G.h1, run: cmdH1, active: (v) => headingLevelAt(v) === 1 },
+  { title: "fmt.h2.title", html: G.h2, run: cmdH2, active: (v) => headingLevelAt(v) === 2 },
+  { title: "fmt.h3.title", html: G.h3, run: cmdH3, active: (v) => headingLevelAt(v) === 3 },
   "sep",
-  { title: "插入表格", html: ICONS.table, run: cmdTable },
-  { title: "插入分隔线", html: ICONS.hr, run: cmdHr },
+  { title: "fmt.table.title", html: ICONS.table, run: cmdTable },
+  { title: "fmt.hr.title", html: ICONS.hr, run: cmdHr },
   "spacer",
 ];
 
@@ -157,8 +158,8 @@ export function initFormatBar(el: FormatBarElements): void {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "fmt-btn";
-      btn.title = item.title;
-      btn.setAttribute("aria-label", item.title);
+      btn.title = t(item.title);
+      btn.setAttribute("aria-label", t(item.title));
       btn.innerHTML = item.html;
       /* 阻止按钮抢焦点：点击后光标仍留在编辑器里 */
       btn.addEventListener("mousedown", (e) => e.preventDefault());
@@ -176,8 +177,8 @@ export function initFormatBar(el: FormatBarElements): void {
   const hideBtn = document.createElement("button");
   hideBtn.type = "button";
   hideBtn.className = "fmt-btn fmt-hide";
-  hideBtn.title = "隐藏工具栏（Alt+T 显示）";
-  hideBtn.setAttribute("aria-label", "隐藏工具栏");
+  hideBtn.title = t("formatBar.hide.title");
+  hideBtn.setAttribute("aria-label", t("formatBar.hide.aria"));
   hideBtn.innerHTML = ICONS.hide;
   hideBtn.addEventListener("mousedown", (e) => e.preventDefault());
   hideBtn.addEventListener("click", () => setFormatBarVisible(false));

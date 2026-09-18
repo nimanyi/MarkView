@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { EditorView } from "@codemirror/view";
@@ -57,6 +58,9 @@ import {
   isDark,
   lookLabel,
 } from "./theme";
+import { t, initLocale, applyDom, onLocaleChange, setLocale, getLocale, availableLocales } from "./i18n";
+import "./locales/zh-CN";
+import "./locales/en";
 
 const preview = document.querySelector<HTMLElement>("#preview")!;
 const panesEl = document.querySelector<HTMLElement>(".panes")!;
@@ -94,6 +98,55 @@ const helpVersionEl = document.querySelector<HTMLElement>("#help-version")!;
 
 const win = getCurrentWindow();
 
+/* ---------- 拖放打开文件 / 文件夹（Tauri 2 拦截原生拖拽事件并转发为窗口事件） ---------- */
+
+const dropOverlay = document.querySelector<HTMLElement>("#drop-overlay")!;
+const DROP_EXTS = new Set(["md", "markdown", "mdx", "txt"]);
+
+/** 从路径提取小写扩展名（不含点） */
+function fileExt(path: string): string {
+  const dot = path.lastIndexOf(".");
+  return dot >= 0 ? path.slice(dot + 1).toLowerCase() : "";
+}
+
+/** 拖放落下后的处理：区分目录与文件，目录则打开文件夹，文件则逐个打开 */
+async function handleDrop(paths: string[]): Promise<void> {
+  let openedFile = false;
+  let openedDir = false;
+  for (const p of paths) {
+    let dir = false;
+    try {
+      dir = await invoke<boolean>("is_dir", { path: p });
+    } catch {
+      /* is_dir 失败时按文件处理 */
+    }
+    if (dir) {
+      await sidebar.openFolderAt(p);
+      sidebarTitleEl.textContent = baseName(p);
+      document.body.classList.remove("sidebar-hidden");
+      openedDir = true;
+    } else if (DROP_EXTS.has(fileExt(p))) {
+      await openPath(p);
+      openedFile = true;
+    }
+  }
+  if (!openedFile && !openedDir && paths.length > 0) {
+    saveHintEl.textContent = t("drop.unsupported");
+  }
+}
+
+void getCurrentWebview().onDragDropEvent((event) => {
+  const e = event.payload;
+  if (e.type === "enter" || e.type === "over") {
+    dropOverlay.hidden = false;
+  } else {
+    dropOverlay.hidden = true;
+    if (e.type === "drop") {
+      void handleDrop(e.paths);
+    }
+  }
+});
+
 /* ---------- 文档状态（多标签：路径与磁盘快照都存在标签里） ---------- */
 
 function currentContent(): string {
@@ -108,7 +161,7 @@ function isDirty(): boolean {
 
 function docName(): string {
   const tab = activeTab();
-  return tab ? tabLabel(tab) : "未命名";
+  return tab ? tabLabel(tab) : t("file.untitled");
 }
 
 /** 同步窗口标题 / 顶栏文件名 / 状态提示 */
@@ -117,8 +170,8 @@ function syncChrome(): void {
   const dirty = isDirty();
   fileNameEl.textContent = name;
   fileNameEl.classList.toggle("dirty", dirty);
-  saveHintEl.textContent = dirty ? "未保存" : "已保存";
-  const title = `${dirty ? "* " : ""}${name} — MDViewer`;
+  saveHintEl.textContent = dirty ? t("save.unsaved") : t("save.saved");
+  const title = `${dirty ? "* " : ""}${name}${t("window.titleSuffix")}`;
   document.title = title;
   void win.setTitle(title).catch(() => {
     /* 标题权限缺失时静默降级（仅页面标题生效） */
@@ -165,7 +218,7 @@ function syncOutline(): void {
 function syncStats(view: EditorView): void {
   statPosEl.textContent = cursorLabel(view);
   const text = currentContent();
-  statCountEl.textContent = `${text.length} 字符 · ${text.split("\n").length} 行`;
+  statCountEl.textContent = t("stat.count", { chars: text.length, lines: text.split("\n").length });
 }
 
 /* ---------- 未保存确认（三态） ---------- */
@@ -173,7 +226,7 @@ function syncStats(view: EditorView): void {
 /** 未保存确认（三态）；displayName 由调用方带引号，兼容单个标签与「等 N 个文档」 */
 function confirmUnsaved(displayName: string): Promise<"save" | "discard" | "cancel"> {
   return new Promise((resolve) => {
-    unsavedText.textContent = `是否保存对${displayName}的更改？`;
+    unsavedText.textContent = t("unsaved.confirm", { name: displayName });
     const done = (value: "save" | "discard" | "cancel") => {
       unsavedDlg.close(value);
     };
@@ -318,7 +371,7 @@ function scheduleAutoSave(): void {
 async function autoSaveNow(): Promise<void> {
   if (activeTab()?.path == null || !isDirty()) return; // 等待期间可能已手动保存
   if (await doSave()) {
-    saveHintEl.textContent = "已自动保存"; // 覆盖 syncChrome 的“已保存”，下次改动会刷新
+    saveHintEl.textContent = t("save.autoSaved"); // 覆盖 syncChrome 的"已保存"，下次改动会刷新
   }
 }
 
@@ -332,7 +385,7 @@ async function doExportHtml(): Promise<void> {
       docName(),
       suggestExportName(docName(), ".html"),
     );
-    if (ok) saveHintEl.textContent = "已导出 HTML";
+    if (ok) saveHintEl.textContent = t("save.exportedHtml");
   } catch (err) {
     saveHintEl.textContent = String(err);
   }
@@ -373,7 +426,7 @@ async function doCheckUpdate(): Promise<void> {
 
 function updateThemeLabel(): void {
   // 颜色风格生效时显示风格名，否则显示三态模式名
-  btnTheme.textContent = `主题：${lookLabel()}`;
+  btnTheme.textContent = t("toolbar.themeDisplay", { mode: lookLabel() });
 }
 
 function doCycleTheme(): void {
@@ -403,7 +456,7 @@ function switchSidebarTab(name: string): void {
 async function doOpenFolder(): Promise<void> {
   await sidebar.openFolder();
   const root = sidebar.root();
-  sidebarTitleEl.textContent = root ? baseName(root) : "文件";
+  sidebarTitleEl.textContent = root ? baseName(root) : t("sidebar.files");
 }
 
 const sidebar: Sidebar = createSidebar(
@@ -455,18 +508,18 @@ async function runSearch(): Promise<void> {
   const root = sidebar.root();
   const pattern = searchInputEl.value.trim();
   if (!root) {
-    searchHint("先打开文件夹（Ctrl+Shift+O）再搜索");
+    searchHint(t("search.noFolder"));
     return;
   }
   if (!pattern) {
-    searchHint("输入关键词后回车搜索");
+    searchHint(t("search.empty"));
     return;
   }
-  searchHint("搜索中…");
+  searchHint(t("search.searching"));
   try {
     const hits = await invoke<SearchHit[]>("search_in_dir", { root, pattern });
     if (hits.length === 0) {
-      searchHint("没有匹配结果");
+      searchHint(t("search.noResults"));
       return;
     }
     const lower = pattern.toLowerCase();
@@ -495,7 +548,7 @@ async function runSearch(): Promise<void> {
     if (hits.length >= SEARCH_LIMIT) {
       const cap = document.createElement("div");
       cap.className = "sidebar-empty";
-      cap.textContent = `结果已达 ${SEARCH_LIMIT} 条上限，已截断`;
+      cap.textContent = t("search.capped", { limit: SEARCH_LIMIT });
       frag.appendChild(cap);
     }
     searchResultsEl.replaceChildren(frag);
@@ -572,7 +625,7 @@ initTabs(document.querySelector<HTMLElement>("#tab-bar")!, {
     view.focus();
   },
   save: (tab) => saveTab(tab),
-  confirm: (tab) => confirmUnsaved(`“${tabLabel(tab)}”`),
+  confirm: (tab) => confirmUnsaved(t("format.quote", { name: tabLabel(tab) })),
   confirmMany: (label) => confirmUnsaved(label),
 });
 openWelcome(); // 启动默认显示引导页（新建 / 打开后自动切换为编辑视图）
@@ -663,8 +716,8 @@ document
     const btn = e.currentTarget as HTMLButtonElement;
     try {
       await navigator.clipboard.writeText(REPO_URL);
-      btn.textContent = "已复制";
-      setTimeout(() => (btn.textContent = "复制"), 1500);
+      btn.textContent = t("save.copied");
+      setTimeout(() => (btn.textContent = t("about.repoCopy")), 1500);
     } catch {
       /* WebView 剪贴板被拒时静默降级 */
     }
@@ -691,24 +744,24 @@ for (const btn of document.querySelectorAll<HTMLButtonElement>(".tab-btn")) {
 /* ---------- 快捷键（表驱动，集中查阅） ---------- */
 
 installShortcuts([
-  { key: "n", label: "新建文档", run: () => void doNew() },
-  { key: "o", label: "打开文件", run: () => void doOpen() },
-  { key: "o", shift: true, label: "打开文件夹", run: () => void doOpenFolder() },
-  { key: "s", label: "保存", run: () => void doSave() },
-  { key: "s", shift: true, label: "另存为", run: () => doSaveAs() },
-  { key: "w", label: "关闭标签页", run: closeActiveTab },
-  { key: "tab", label: "下一个标签", run: () => activateNext(1) },
-  { key: "tab", shift: true, label: "上一个标签", run: () => activateNext(-1) },
-  { key: "e", shift: true, label: "导出 HTML", run: () => void doExportHtml() },
-  { key: "p", label: "打印 / 导出 PDF", run: () => void doExportPdf() },
-  { key: ",", label: "设置", run: () => openSettingsDialog() },
-  { key: "h", shift: true, label: "使用说明", run: () => helpDlg.showModal() },
-  { key: "\\", label: "切换侧边栏", run: toggleSidebar },
-  { key: "v", shift: true, label: "切换视图（双栏 / 仅编辑 / 仅预览）", run: () => cycleViewMode() },
-  { key: "d", shift: true, label: "隐藏 / 显示预览", run: togglePreview },
-  { key: "l", shift: true, label: "切换主题", run: doCycleTheme },
-  { key: "f", shift: true, label: "全文搜索", run: focusSearch },
-  { key: "u", shift: true, label: "检查更新", run: () => void doCheckUpdate() },
+  { key: "n", label: t("sc.new"), run: () => void doNew() },
+  { key: "o", label: t("sc.open"), run: () => void doOpen() },
+  { key: "o", shift: true, label: t("sc.openDir"), run: () => void doOpenFolder() },
+  { key: "s", label: t("sc.save"), run: () => void doSave() },
+  { key: "s", shift: true, label: t("sc.saveAs"), run: () => doSaveAs() },
+  { key: "w", label: t("sc.closeTab"), run: closeActiveTab },
+  { key: "tab", label: t("sc.nextTab"), run: () => activateNext(1) },
+  { key: "tab", shift: true, label: t("sc.prevTab"), run: () => activateNext(-1) },
+  { key: "e", shift: true, label: t("sc.exportHtml"), run: () => void doExportHtml() },
+  { key: "p", label: t("sc.exportPdf"), run: () => void doExportPdf() },
+  { key: ",", label: t("sc.settings"), run: () => openSettingsDialog() },
+  { key: "h", shift: true, label: t("sc.help"), run: () => helpDlg.showModal() },
+  { key: "\\", label: t("sc.toggleSidebar"), run: toggleSidebar },
+  { key: "v", shift: true, label: t("sc.toggleView"), run: () => cycleViewMode() },
+  { key: "d", shift: true, label: t("sc.togglePreview"), run: togglePreview },
+  { key: "l", shift: true, label: t("sc.toggleTheme"), run: doCycleTheme },
+  { key: "f", shift: true, label: t("sc.search"), run: focusSearch },
+  { key: "u", shift: true, label: t("sc.checkUpdate"), run: () => void doCheckUpdate() },
 ]);
 
 /* ---------- 关闭拦截：多个脏标签时批量确认 ---------- */
@@ -729,6 +782,35 @@ void win.onCloseRequested(async (event) => {
 });
 
 /* ---------- 初始化 ---------- */
+
+/* i18n：初始化语言（localStorage → 系统检测 → 默认），翻译静态 HTML */
+initLocale();
+applyDom();
+
+/* 语言选择器：填充可用语言列表，切换时持久化并重新渲染界面 */
+const langSelect = document.querySelector<HTMLSelectElement>("#set-language")!;
+if (langSelect) {
+  for (const loc of availableLocales()) {
+    const opt = document.createElement("option");
+    opt.value = loc.id;
+    opt.textContent = loc.label;
+    langSelect.appendChild(opt);
+  }
+  langSelect.value = getLocale();
+  langSelect.addEventListener("change", () => {
+    setLocale(langSelect.value);
+  });
+}
+
+/* 语言切换回调：重新渲染所有动态文本 */
+onLocaleChange(() => {
+  syncChrome();
+  syncStats(view);
+  updateThemeLabel();
+  refreshTabs();
+  scheduleRender();
+  if (langSelect) langSelect.value = getLocale();
+});
 
 void renderPreview();
 syncChrome();

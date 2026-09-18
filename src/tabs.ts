@@ -13,6 +13,7 @@
 
 import { baseName } from "./files";
 import { showContextMenu, type CtxMenuEntry } from "./contextmenu";
+import { t } from "./i18n";
 
 export interface TabState {
   id: number;
@@ -27,14 +28,14 @@ export interface TabState {
 }
 
 export function tabLabel(tab: TabState): string {
-  if (tab.kind === "welcome") return "欢迎使用";
-  return tab.path ? baseName(tab.path) : "未命名";
+  if (tab.kind === "welcome") return t("tab.welcome");
+  return tab.path ? baseName(tab.path) : t("file.untitled");
 }
 
 /** 确认对话框用的文档名：单个直接名称，多个为「“首个”等 N 个文档」 */
 export function dirtyLabel(dirty: TabState[]): string {
-  if (dirty.length === 1) return `“${tabLabel(dirty[0])}”`;
-  return `“${tabLabel(dirty[0])}”等 ${dirty.length} 个文档`;
+  if (dirty.length === 1) return t("format.quote", { name: tabLabel(dirty[0]) });
+  return t("tab.dirtyMany", { first: t("format.quote", { name: tabLabel(dirty[0]) }), count: dirty.length });
 }
 
 export interface TabsHooks {
@@ -90,7 +91,7 @@ function renderTabs(): void {
     const el = document.createElement("div");
     el.className = "tab" + (tab.id === activeId ? " active" : "");
     el.role = "tab";
-    el.title = tab.path ?? "未命名";
+    el.title = tab.path ?? t("file.untitled");
     if (tab.text !== tab.diskText) el.classList.add("dirty");
 
     const dot = document.createElement("span");
@@ -105,7 +106,7 @@ function renderTabs(): void {
     const close = document.createElement("button");
     close.type = "button";
     close.className = "tab-close";
-    close.title = "关闭标签页";
+    close.title = t("tab.close.title");
     close.textContent = "×";
     close.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -132,8 +133,8 @@ function renderTabs(): void {
   const add = document.createElement("button");
   add.type = "button";
   add.className = "tab-new";
-  add.title = "新建标签页（Ctrl+N）";
-  add.setAttribute("aria-label", "新建标签页");
+  add.title = t("tab.new");
+  add.setAttribute("aria-label", t("tab.new.aria"));
   add.textContent = "+";
   add.addEventListener("click", () => openTab(null, ""));
   frag.appendChild(add);
@@ -236,25 +237,25 @@ function showTabMenu(tab: TabState, x: number, y: number): void {
   const right = tabs.slice(idx + 1);
   const others = [...left, ...right];
   const items: CtxMenuEntry[] = [
-    { label: "关闭标签页", run: () => void closeTab(tab.id) },
+    { label: t("tab.close"), run: () => void closeTab(tab.id) },
     "sep",
     {
-      label: `关闭左侧（${left.length} 个）`,
+      label: t("tab.closeLeft", { count: left.length }),
       disabled: left.length === 0,
       run: () => void closeTabs(left.map((t) => t.id)),
     },
     {
-      label: `关闭右侧（${right.length} 个）`,
+      label: t("tab.closeRight", { count: right.length }),
       disabled: right.length === 0,
       run: () => void closeTabs(right.map((t) => t.id)),
     },
     {
-      label: `关闭其他（${others.length} 个）`,
+      label: t("tab.closeOthers", { count: others.length }),
       disabled: others.length === 0,
       run: () => void closeTabs(others.map((t) => t.id)),
     },
     {
-      label: `关闭所有（${tabs.length} 个）`,
+      label: t("tab.closeAll", { count: tabs.length }),
       run: () => void closeTabs(tabs.map((t) => t.id)),
     },
   ];
